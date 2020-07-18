@@ -16,7 +16,7 @@ test("Build Stack", () => {
   });
   expect(stack).toHaveResource("AWS::SNS::Subscription", {
     TopicArn: "arn:aws:sns:ap-northeast-1:1234567890:s3-cloudtrail-event",
-    Protocol: " sqs",
+    Protocol: "sqs",
   });
   expect(stack).toHaveResource("AWS::Lambda::Function", {
     Role: "arn:aws:iam::1234567890:role/LambdaUguisuRole",
