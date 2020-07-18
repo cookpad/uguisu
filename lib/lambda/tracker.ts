@@ -14,9 +14,9 @@ const rules: Array<models.uguisuRule> = [
   new resource_lifeevent.rule(),
 ];
 
-interface arguments {
+export interface arguments {
   slackWebhookURL: string;
-  post(url: string, data?: any): Promise<any>;
+  post(url: string, data: ChatPostMessageArguments): Promise<any>;
   getObject(params: S3.GetObjectRequest): Promise<any>;
 }
 
@@ -57,23 +57,26 @@ export async function handler(event: SQSEvent, args: arguments) {
   }
 
   console.log("detections:", JSON.stringify(results));
-  /*
-  const logs = allEvents.filter(filterEvent);
 
-  const slackProc = logs.map((log: models.cloudTrailRecord) => {
-    const requestParameters = JSON.stringify(log.requestParameters);
+  const slackProc = results.map((log: models.detection) => {
+    const requestParameters = JSON.stringify(log.event.requestParameters);
     const msg: ChatPostMessageArguments = {
-      text: "Event: " + log.eventName,
+      text: "Event: " + log.event.eventName,
       channel: "",
       attachments: [
         {
           fields: [
-            { title: "Time", value: log.eventTime, short: true },
-            { title: "Region", value: log.awsRegion, short: true },
-            { title: "User", value: log.userIdentity.arn },
-            { title: "SrouceIPAddress", value: log.sourceIPAddress },
-            { title: "UserAgent", value: log.userAgent },
-            { title: "ErrorMessage", value: log.errorMessage },
+            { title: "Time", value: log.event.eventTime, short: true },
+            { title: "Region", value: log.event.awsRegion, short: true },
+            {
+              title: "User",
+              value: log.event.userIdentity
+                ? log.event.userIdentity.arn
+                : "N/A",
+            },
+            { title: "SrouceIPAddress", value: log.event.sourceIPAddress },
+            { title: "UserAgent", value: log.event.userAgent },
+            { title: "ErrorMessage", value: log.event.errorMessage },
             {
               title: "requestParameters",
               value: requestParameters,
@@ -88,7 +91,7 @@ export async function handler(event: SQSEvent, args: arguments) {
   console.log(slackProc);
   const slackResults = await Promise.all(slackProc);
   console.log("slack results:", slackResults);
-  */
+
   return "ok";
 }
 

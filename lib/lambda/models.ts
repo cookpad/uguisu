@@ -1,3 +1,7 @@
+export interface cloudTrailEvent {
+  Records: Array<cloudTrailRecord>;
+}
+
 export interface cloudTrailRecord {
   eventVersion: string;
   eventTime: string;
@@ -21,7 +25,7 @@ export interface cloudTrailRecord {
 
 export interface detection {
   rule: uguisuRule;
-  event?: cloudTrailRecord;
+  event: cloudTrailRecord;
 }
 
 export interface ruleParameters {

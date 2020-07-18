@@ -33,5 +33,19 @@
     "aws-sdk": "^2.709.0",
     "axios": "^0.19.2",
     "@types/aws-lambda": "^8.10.57"
+  },
+  "cdk-lambda": "/asset-output/index.js",
+  "targets": {
+    "cdk-lambda": {
+      "context": "node",
+      "includeNodeModules": {
+        "aws-sdk": false
+      },
+      "sourceMap": false,
+      "minify": false,
+      "engines": {
+        "node": ">= 12"
+      }
+    }
   }
 }
