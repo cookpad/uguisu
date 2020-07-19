@@ -2,7 +2,11 @@ import { S3EventRecord, SQSEvent } from "aws-lambda";
 import { S3, Lambda } from "aws-sdk";
 
 import { gunzipSync } from "zlib";
-import { ChatPostMessageArguments } from "@slack/web-api";
+import {
+  ChatPostMessageArguments,
+  MessageAttachment,
+  MrkdwnElement,
+} from "@slack/web-api";
 import axios from "axios";
 
 import * as models from "./models";
@@ -58,40 +62,63 @@ export async function handler(event: SQSEvent, args: arguments) {
 
   console.log("detections:", JSON.stringify(results));
 
-  const slackProc = results.map((log: models.detection) => {
-    const requestParameters = JSON.stringify(log.event.requestParameters);
-    const msg: ChatPostMessageArguments = {
-      text: "Event: " + log.event.eventName,
-      channel: "",
-      attachments: [
+  const toField = (title: string, value: string): MrkdwnElement => {
+    return {
+      type: "mrkdwn",
+      text: "*" + title + "*\n" + value,
+    };
+  };
+
+  const attachments = results.map((log: models.detection) => {
+    const ev = log.event;
+    const fields = [
+      toField("EventName", ev.eventName),
+      toField("EventTime", ev.eventTime),
+      toField("Region", ev.awsRegion),
+      toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
+      toField(
+        "SourceIPAddress",
+        ev.sourceIPAddress ? ev.sourceIPAddress : "N/A"
+      ),
+      toField("UserAgent", ev.userAgent ? ev.userAgent : "N/A"),
+    ];
+
+    if (ev.errorCode) {
+      fields.push(toField("ErrorCode", ev.errorCode));
+    }
+    if (ev.errorMessage) {
+      fields.push(toField("ErrorMessage", ev.errorMessage));
+    }
+    if (ev.requestParameters) {
+      const requestParameters = JSON.stringify(log.event.requestParameters);
+      fields.push({
+        type: "mrkdwn",
+        text: "*RequestParameters*:\n```" + requestParameters + "```",
+      });
+    }
+
+    const attachment: MessageAttachment = {
+      title: "Detected: " + log.rule.title,
+      text: log.rule.description,
+      color: "#F2C744",
+      blocks: [
         {
-          fields: [
-            { title: "Time", value: log.event.eventTime, short: true },
-            { title: "Region", value: log.event.awsRegion, short: true },
-            {
-              title: "User",
-              value: log.event.userIdentity
-                ? log.event.userIdentity.arn
-                : "N/A",
-            },
-            { title: "SrouceIPAddress", value: log.event.sourceIPAddress },
-            { title: "UserAgent", value: log.event.userAgent },
-            { title: "ErrorMessage", value: log.event.errorMessage },
-            {
-              title: "requestParameters",
-              value: requestParameters,
-            },
-          ],
+          type: "section",
+          fields: fields,
         },
       ],
     };
 
-    return args.post(args.slackWebhookURL, msg);
+    return attachment;
   });
-  console.log(slackProc);
-  const slackResults = await Promise.all(slackProc);
-  console.log("slack results:", slackResults);
 
+  const msg: ChatPostMessageArguments = {
+    text: "",
+    channel: "",
+    attachments: attachments,
+  };
+  const slackRes = await args.post(args.slackWebhookURL, msg);
+  console.log("slackRes:", slackRes);
   return "ok";
 }
 

@@ -54,7 +54,7 @@ test("Run handler", async () => {
           eventID: "x123",
           eventName: "RunInstances",
           eventSource: "ec2.amazonaws.com",
-          eventTime: "",
+          eventTime: "2020-04-20T12:34:56",
           eventType: "",
           eventVersion: "",
           recipientAccountId: "",
@@ -103,4 +103,15 @@ test("Run handler", async () => {
   expect(result).toBe("ok");
   expect(s3Req.length).toBe(2);
   expect(chatMsgs.length).toBe(1);
+  const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
+  expect(msg.attachments).toBeDefined();
+  expect(msg.attachments.length).toBe(1);
+  expect(msg.attachments[0].blocks).toBeDefined();
+  expect(msg.attachments[0].blocks.length).toBe(1);
+  expect(msg.attachments[0].blocks[0].fields).toBeDefined();
+  const fields = msg.attachments[0].blocks[0].fields;
+  expect(fields[0].text).toContain("*EventName*");
+  expect(fields[0].text).toContain("RunInstances");
+  expect(fields[1].text).toContain("*EventTime*");
+  expect(fields[1].text).toContain("2020-04-20T12:34:56");
 });
