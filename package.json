@@ -2,13 +2,14 @@
   "name": "uguisu",
   "version": "0.1.0",
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "tsc; jest",
     "cdk": "cdk"
   },
-  "main": "./lib/uguisu-stack.ts",
-  "type": "./lib/uguisu-stack.d.ts",
+  "main": "./dist/lib/uguisu-stack.js",
+  "type": "./dist/lib/uguisu-stack.d.ts",
   "files": [
     "lib"
   ],
