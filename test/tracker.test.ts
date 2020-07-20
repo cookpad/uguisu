@@ -59,6 +59,9 @@ test("Run handler", async () => {
           eventVersion: "",
           recipientAccountId: "",
           requestID: "",
+          requestParameters: {
+            instanceType: "c4.8xlarge",
+          },
         },
       ],
     },
@@ -107,9 +110,12 @@ test("Run handler", async () => {
   expect(msg.attachments).toBeDefined();
   expect(msg.attachments.length).toBe(1);
   expect(msg.attachments[0].blocks).toBeDefined();
-  expect(msg.attachments[0].blocks.length).toBe(1);
-  expect(msg.attachments[0].blocks[0].fields).toBeDefined();
-  const fields = msg.attachments[0].blocks[0].fields;
+  expect(msg.attachments[0].blocks.length).toBe(4);
+  expect(msg.attachments[0].blocks[0].text.text).toContain(
+    "Detected: Resource Life Event"
+  );
+  expect(msg.attachments[0].blocks[2].fields).toBeDefined();
+  const fields = msg.attachments[0].blocks[2].fields;
   expect(fields[0].text).toContain("*EventName*");
   expect(fields[0].text).toContain("RunInstances");
   expect(fields[1].text).toContain("*EventTime*");

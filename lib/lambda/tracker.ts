@@ -62,64 +62,74 @@ export async function handler(event: SQSEvent, args: arguments) {
 
   console.log("detections:", JSON.stringify(results));
 
-  const toField = (title: string, value: string): MrkdwnElement => {
-    return {
-      type: "mrkdwn",
-      text: "*" + title + "*\n" + value,
-    };
-  };
-
-  const attachments = results.map((log: models.detection) => {
-    const ev = log.event;
-    const fields = [
-      toField("EventName", ev.eventName),
-      toField("EventTime", ev.eventTime),
-      toField("Region", ev.awsRegion),
-      toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
-      toField(
-        "SourceIPAddress",
-        ev.sourceIPAddress ? ev.sourceIPAddress : "N/A"
-      ),
-      toField("UserAgent", ev.userAgent ? ev.userAgent : "N/A"),
-    ];
-
-    if (ev.errorCode) {
-      fields.push(toField("ErrorCode", ev.errorCode));
-    }
-    if (ev.errorMessage) {
-      fields.push(toField("ErrorMessage", ev.errorMessage));
-    }
-    if (ev.requestParameters) {
-      const requestParameters = JSON.stringify(log.event.requestParameters);
-      fields.push({
-        type: "mrkdwn",
-        text: "*RequestParameters*:\n```" + requestParameters + "```",
-      });
-    }
-
-    const attachment: MessageAttachment = {
-      title: "Detected: " + log.rule.title,
-      text: log.rule.description,
-      color: "#F2C744",
-      blocks: [
-        {
-          type: "section",
-          fields: fields,
-        },
-      ],
-    };
-
-    return attachment;
-  });
-
   const msg: ChatPostMessageArguments = {
     text: "",
     channel: "",
-    attachments: attachments,
+    attachments: results.map(buildAttachment),
   };
+
+  console.log("slackMsg:", JSON.stringify(msg));
   const slackRes = await args.post(args.slackWebhookURL, msg);
   console.log("slackRes:", slackRes);
   return "ok";
+}
+
+function buildAttachment(log: models.detection): MessageAttachment {
+  const toField = (title: string, value: string): MrkdwnElement => {
+    return { type: "mrkdwn", text: "*" + title + "*\n" + value };
+  };
+
+  const ev = log.event;
+  const fields = [
+    toField("EventName", ev.eventName),
+    toField("EventTime", ev.eventTime),
+    toField("Region", ev.awsRegion),
+    toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
+    toField("SourceIPAddress", ev.sourceIPAddress ? ev.sourceIPAddress : "N/A"),
+    toField("UserAgent", ev.userAgent ? ev.userAgent : "N/A"),
+  ];
+
+  if (ev.errorCode) {
+    fields.push(toField("ErrorCode", ev.errorCode));
+  }
+  if (ev.errorMessage) {
+    fields.push(toField("ErrorMessage", ev.errorMessage));
+  }
+
+  const attachment: MessageAttachment = {
+    color: "#F2C744",
+    blocks: [
+      {
+        type: "section",
+        text: { type: "mrkdwn", text: "*Detected: " + log.rule.title + "*" },
+      },
+      {
+        type: "section",
+        text: { type: "mrkdwn", text: log.rule.description },
+      },
+      {
+        type: "section",
+        fields: fields,
+      },
+    ],
+  };
+
+  if (ev.requestParameters) {
+    const requestParameters = JSON.stringify(
+      log.event.requestParameters,
+      null,
+      2
+    );
+    attachment.blocks?.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*RequestParameters*:\n```" + requestParameters + "```",
+      },
+    });
+  }
+
+  return attachment;
 }
 
 async function fetchCloudTrailRecords(args: arguments, event: SQSEvent) {

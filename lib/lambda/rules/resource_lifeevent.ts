@@ -23,7 +23,7 @@ export class rule extends uguisuRule {
   constructor() {
     super({
       id: "resource_lifeevent",
-      title: "Detect resource lifecycle event",
+      title: "Resource Life Event",
       description:
         "Monitoring events of EC2, DynamoDB, CloudFormation, RDS, ACM and VPC regarding creation and destruction.",
     });
