@@ -1,9 +1,6 @@
 {
   "name": "uguisu",
   "version": "0.1.0",
-  "bin": {
-    "uguisu": "bin/uguisu.js"
-  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
