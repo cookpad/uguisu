@@ -11,7 +11,7 @@
   "main": "./dist/lib/uguisu-stack.js",
   "type": "./dist/lib/uguisu-stack.d.ts",
   "files": [
-    "dist"
+    "lib"
   ],
   "devDependencies": {
     "@aws-cdk/assert": "1.51.0",

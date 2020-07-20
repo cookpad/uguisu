@@ -6,6 +6,7 @@ import * as iam from "@aws-cdk/aws-iam";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
 import { NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
+import * as path from "path";
 
 export interface Arguments {
   snsTopicARN: string;
