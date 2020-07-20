@@ -8,8 +8,8 @@
     "test": "tsc; jest",
     "cdk": "cdk"
   },
-  "main": "./dist/lib/uguisu-stack.js",
-  "type": "./dist/lib/uguisu-stack.d.ts",
+  "main": "./lib/uguisu-stack.js",
+  "type": "./lib/uguisu-stack.d.ts",
   "files": [
     "lib"
   ],
