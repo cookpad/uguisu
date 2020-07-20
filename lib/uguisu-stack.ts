@@ -38,7 +38,7 @@ export class UguisuStack extends cdk.Stack {
     });
 
     this.tracker = new NodejsFunction(this, "tracker", {
-      entry: "lib/lambda/tracker.ts",
+      entry: path.join(__dirname, "lambda/tracker.ts"),
       handler: "main",
       timeout: cdk.Duration.seconds(300),
       role: role,
