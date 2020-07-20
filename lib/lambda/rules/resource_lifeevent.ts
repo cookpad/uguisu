@@ -39,7 +39,16 @@ export class rule extends uguisuRule {
       return null;
     }
 
-    if (record.sourceIPAddress === "autoscaling.amazonaws.com") {
+    // Ignore error event
+    if (record.errorCode !== undefined) {
+      return null;
+    }
+
+    // Ignore events by autoscaling or batch
+    if (
+      record.sourceIPAddress === "autoscaling.amazonaws.com" ||
+      record.sourceIPAddress === "batch.amazonaws.com"
+    ) {
       return null;
     }
 
