@@ -35,17 +35,21 @@ export interface ruleParameters {
   title: string;
   // description is more detail (What is monitored, reason of detection, etc.)
   description: string;
+  // severity is
+  severity: "high" | "medium" | "low";
 }
 
 export abstract class uguisuRule {
   readonly id: string;
   readonly title: string;
   readonly description: string;
+  readonly severity: "high" | "medium" | "low";
 
   constructor(params: ruleParameters) {
     this.id = params.id;
     this.title = params.title;
     this.description = params.description;
+    this.severity = params.severity;
   }
   abstract detect(record: cloudTrailRecord): detection | null;
 }

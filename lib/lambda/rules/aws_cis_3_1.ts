@@ -7,6 +7,7 @@ export class rule extends uguisuRule {
       title: "Unauthorized API calls monitoring",
       description:
         "AWS CIS benchmark 3.1 recommend to ensure a log metric filter and alarm exist for unauthorized API calls",
+      severity: "medium",
     });
   }
 

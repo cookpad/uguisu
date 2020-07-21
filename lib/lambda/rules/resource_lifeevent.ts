@@ -26,6 +26,7 @@ export class rule extends uguisuRule {
       title: "Resource Life Event",
       description:
         "Monitoring events of EC2, DynamoDB, CloudFormation, RDS, ACM and VPC regarding creation and destruction.",
+      severity: "low",
     });
   }
 

@@ -96,8 +96,13 @@ function buildAttachment(log: models.detection): MessageAttachment {
     fields.push(toField("ErrorMessage", ev.errorMessage));
   }
 
+  const colorMap: { [key: string]: string } = {
+    high: "danger",
+    medium: "warning",
+    low: "good",
+  };
   const attachment: MessageAttachment = {
-    color: "#F2C744",
+    color: colorMap[log.rule.severity],
     blocks: [
       {
         type: "section",
