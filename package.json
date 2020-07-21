@@ -24,18 +24,19 @@
     "typescript": "~3.7.2"
   },
   "dependencies": {
-    "@aws-cdk/core": "1.51.0",
     "@aws-cdk/aws-iam": "1.51.0",
     "@aws-cdk/aws-lambda-event-sources": "1.51.0",
     "@aws-cdk/aws-lambda-nodejs": "1.51.0",
     "@aws-cdk/aws-sns": "1.51.0",
     "@aws-cdk/aws-sns-subscriptions": "1.51.0",
     "@aws-cdk/aws-sqs": "1.51.0",
-    "source-map-support": "^0.5.16",
+    "@aws-cdk/core": "1.51.0",
+    "@sentry/node": "^5.19.2",
     "@slack/web-api": "^5.10.0",
+    "@types/aws-lambda": "^8.10.57",
     "aws-sdk": "^2.709.0",
     "axios": "^0.19.2",
-    "@types/aws-lambda": "^8.10.57"
+    "source-map-support": "^0.5.16"
   },
   "cdk-lambda": "/asset-output/index.js",
   "targets": {

@@ -12,6 +12,8 @@ export interface Arguments {
   snsTopicARN: string;
   lambdaRoleARN: string;
   slackWebhookURL: string;
+  sentryDSN?: string;
+  disableRules?: string;
 }
 
 export class UguisuStack extends cdk.Stack {
@@ -46,6 +48,8 @@ export class UguisuStack extends cdk.Stack {
       events: [new SqsEventSource(this.s3EventQueue, { batchSize: 1 })],
       environment: {
         SLACK_WEBHOOK_RUL: args.slackWebhookURL,
+        SENTRY_DSN: args.sentryDSN || "",
+        DISABLE_RULES: args.disableRules || "",
       },
     });
   }

@@ -5,7 +5,7 @@ import { S3 } from "aws-sdk";
 import { ChatPostMessageArguments } from "@slack/web-api";
 import { gzipSync } from "zlib";
 
-test("Run handler", async () => {
+test("Handler basic", async () => {
   const body = {
     Message: JSON.stringify({
       Records: [
@@ -120,4 +120,175 @@ test("Run handler", async () => {
   expect(fields[0].text).toContain("RunInstances");
   expect(fields[1].text).toContain("*EventTime*");
   expect(fields[1].text).toContain("2020-04-20T12:34:56");
+});
+
+describe("handler variation", async () => {
+  const sqsEvent: SQSEvent = {
+    Records: [
+      {
+        attributes: {
+          SenderId: "",
+          ApproximateFirstReceiveTimestamp: "",
+          ApproximateReceiveCount: "",
+          SentTimestamp: "",
+        },
+        awsRegion: "us-east-1",
+        eventSource: "xxx",
+        eventSourceARN: "",
+        md5OfBody: "",
+        messageAttributes: {},
+        messageId: "",
+        receiptHandle: "testhandle",
+        body: JSON.stringify({
+          Message: JSON.stringify({
+            Records: [
+              {
+                s3: {
+                  bucket: { name: "test-bucket" },
+                  object: { key: "test-object" },
+                },
+              },
+            ],
+          }),
+        }),
+      },
+    ],
+  };
+
+  const dummyURL = "https://hooks.slack.com/services/XXX/YYY/ZZZ";
+
+  const newGetObject = (body: any) => {
+    return async (params: S3.GetObjectRequest) => {
+      return { Body: Buffer.from(gzipSync(JSON.stringify(body))) };
+    };
+  };
+  const newPost = (chatMsgs: Array<ChatPostMessageArguments>) => {
+    return async (url: string, msg: ChatPostMessageArguments) => {
+      chatMsgs.push(msg);
+    };
+  };
+
+  it("simple run", async () => {
+    const body = {
+      Records: [
+        {
+          awsRegion: "ap-northeast-1",
+          eventID: "x123",
+          eventName: "RunInstances",
+          eventSource: "ec2.amazonaws.com",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {
+            instanceType: "c4.8xlarge",
+          },
+        },
+      ],
+    };
+
+    const chatMsgs: Array<ChatPostMessageArguments> = [];
+    const args: arguments = {
+      slackWebhookURL: dummyURL,
+      getObject: newGetObject(body),
+      post: newPost(chatMsgs),
+    };
+
+    const result = await handler(sqsEvent, args);
+    expect(result).toBe("ok");
+    expect(chatMsgs.length).toBe(1);
+    const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
+    expect(msg.attachments[0].blocks[0].text.text).toContain(
+      "Detected: Resource Life Event"
+    );
+  });
+
+  describe("disable rule", () => {
+    const body: cloudTrailEvent = {
+      Records: [
+        {
+          // aws_cis_3.4
+          awsRegion: "ap-northeast-1",
+          eventID: "x123",
+          eventName: "CreatePolicy",
+          eventSource: "",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {},
+        },
+        {
+          // aws_cis_3.5
+          awsRegion: "ap-northeast-1",
+          eventID: "x123",
+          eventName: "CreateTrail",
+          eventSource: "",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {},
+        },
+        {
+          // aws_cis_3.6
+          awsRegion: "ap-northeast-1",
+          eventID: "x123",
+          eventName: "ConsoleLogin",
+          eventSource: "",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {},
+          errorMessage: "Failed authentication",
+        },
+      ],
+    };
+
+    it("disable 2 rules", async () => {
+      const chatMsgs: Array<ChatPostMessageArguments> = [];
+      const args: arguments = {
+        slackWebhookURL: dummyURL,
+        disableRules: "aws_cis_3.4,aws_cis_3.6",
+        getObject: newGetObject(body),
+        post: newPost(chatMsgs),
+      };
+
+      const result = await handler(sqsEvent, args);
+      expect(result).toBe("ok");
+      expect(chatMsgs.length).toBe(1);
+      expect(chatMsgs[0].attachments!.length).toBe(1);
+      const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
+      expect(msg.attachments[0].blocks[0].text.text).toContain(
+        "Detected: CloudTrail configuration changes"
+      );
+    });
+
+    it("disable 1 rule", async () => {
+      const chatMsgs: Array<ChatPostMessageArguments> = [];
+      const args: arguments = {
+        slackWebhookURL: dummyURL,
+        disableRules: "aws_cis_3.5",
+        getObject: newGetObject(body),
+        post: newPost(chatMsgs),
+      };
+
+      const result = await handler(sqsEvent, args);
+      expect(result).toBe("ok");
+      expect(chatMsgs.length).toBe(1);
+      expect(chatMsgs[0].attachments!.length).toBe(2);
+      const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
+      expect(msg.attachments[0].blocks[0].text.text).toContain(
+        "Detected: IAM policy changes"
+      );
+      expect(msg.attachments[1].blocks[0].text.text).toContain(
+        "Detected: AWS Management Console authentication failures"
+      );
+    });
+  });
 });

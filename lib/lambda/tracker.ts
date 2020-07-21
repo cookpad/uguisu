@@ -9,6 +9,9 @@ import {
 } from "@slack/web-api";
 import axios from "axios";
 
+import * as Sentry from "@sentry/node";
+Sentry.init({ dsn: process.env.SENTRY_DSN });
+
 import * as models from "./models";
 import * as aws_cis_3_1 from "./rules/aws_cis_3_1";
 import * as aws_cis_3_2 from "./rules/aws_cis_3_2";
@@ -47,6 +50,8 @@ const rules: Array<models.uguisuRule> = [
 
 export interface arguments {
   slackWebhookURL: string;
+  disableRules?: string;
+
   post(url: string, data: ChatPostMessageArguments): Promise<any>;
   getObject(params: S3.GetObjectRequest): Promise<any>;
 }
@@ -57,6 +62,7 @@ export async function main(event: any, context: any) {
 
   const args = {
     slackWebhookURL: process.env.SLACK_WEBHOOK_RUL!,
+    disableRules: process.env.DISABLE_RULES,
     post: axios.post,
     getObject: async (params: S3.GetObjectRequest) => {
       return s3.getObject(params).promise();
@@ -73,9 +79,16 @@ export async function handler(event: SQSEvent, args: arguments) {
     return "no event data";
   }
 
+  const disableRuleIDs: Array<string> = args.disableRules
+    ? args.disableRules.split(",")
+    : [];
+  const enableRules = rules.filter(
+    (r) => !disableRuleIDs.some((d) => d === r.id)
+  );
+
   const results = allEvents
     .map((event: models.cloudTrailRecord) => {
-      return rules
+      return enableRules
         .map((rule) => rule.detect(event))
         .filter((result: models.detection | null) => result !== null);
     })

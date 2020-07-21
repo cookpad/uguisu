@@ -3,26 +3,33 @@ export interface cloudTrailEvent {
 }
 
 export interface cloudTrailRecord {
-  eventVersion: string;
   eventTime: string;
+  eventVersion: string;
+  userIdentity: any;
   eventSource: string;
   eventName: string;
   awsRegion: string;
-  requestID: string;
-  eventID: string;
-  eventType: string;
-  recipientAccountId: string;
+  sourceIPAddress: string;
+  userAgent: string;
 
   errorCode?: string;
   errorMessage?: string;
 
-  sourceIPAddress?: string;
-  userIdentity?: any;
-  userAgent?: string;
-  requestParameters?: any;
-  responseElements?: any;
-
+  requestParameters: any;
+  responseElements: any;
   additionalEventData?: any;
+  requestID: string;
+  eventID: string;
+  eventType: string;
+  apiVersion?: string;
+  managementEvent?: boolean;
+  readOnly?: boolean;
+  resources?: any;
+  recipientAccountId?: string;
+  serviceEventDetails?: string;
+  sharedEventID?: string;
+  vpcEndpointId?: string;
+  eventCategory: string;
 }
 
 export interface detection {

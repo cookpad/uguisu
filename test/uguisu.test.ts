@@ -23,6 +23,8 @@ test("Build Stack", () => {
     Environment: {
       Variables: {
         SLACK_WEBHOOK_RUL: "https://hooks.slack.com/services/1234/5678/ABCDEFG",
+        SENTRY_DSN: "",
+        DISABLE_RULES: "",
       },
     },
   });
