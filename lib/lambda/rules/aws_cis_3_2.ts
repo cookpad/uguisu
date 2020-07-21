@@ -17,7 +17,8 @@ export class rule extends uguisuRule {
     if (
       record.eventName === "ConsoleLogin" &&
       record.additionalEventData !== undefined &&
-      record.additionalEventData.MFAUsed !== "Yes"
+      record.additionalEventData.MFAUsed !== "Yes" &&
+      record.additionalEventData.SamlProviderArn === undefined
     ) {
       return {
         rule: this,
