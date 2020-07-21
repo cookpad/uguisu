@@ -110,10 +110,11 @@ function buildAttachment(log: models.detection): MessageAttachment {
   const fields = [
     toField("EventName", ev.eventName),
     toField("EventTime", ev.eventTime),
+    toField("EventID", ev.eventID),
     toField("Region", ev.awsRegion),
     toField("AccountID", ev.userIdentity ? ev.userIdentity.accountId : "N/A"),
-    toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
     toField("SourceIPAddress", ev.sourceIPAddress ? ev.sourceIPAddress : "N/A"),
+    toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
     toField("UserAgent", ev.userAgent ? ev.userAgent : "N/A"),
   ];
 
