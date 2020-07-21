@@ -21,6 +21,8 @@ export interface cloudTrailRecord {
   userAgent?: string;
   requestParameters?: any;
   responseElements?: any;
+
+  additionalEventData?: any;
 }
 
 export interface detection {
@@ -35,7 +37,10 @@ export interface ruleParameters {
   title: string;
   // description is more detail (What is monitored, reason of detection, etc.)
   description: string;
-  // severity is
+  // severity:
+  //   high: risky event is on going
+  //   medium: suspicious event
+  //   low: just notification
   severity: "high" | "medium" | "low";
 }
 

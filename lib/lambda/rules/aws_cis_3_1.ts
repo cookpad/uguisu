@@ -1,5 +1,8 @@
 import { cloudTrailRecord, uguisuRule, detection } from "../models";
 
+// CIS 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls
+// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.1-remediation
+
 export class rule extends uguisuRule {
   constructor() {
     super({

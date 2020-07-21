@@ -11,10 +11,37 @@ import axios from "axios";
 
 import * as models from "./models";
 import * as aws_cis_3_1 from "./rules/aws_cis_3_1";
+import * as aws_cis_3_2 from "./rules/aws_cis_3_2";
+import * as aws_cis_3_3 from "./rules/aws_cis_3_3";
+import * as aws_cis_3_4 from "./rules/aws_cis_3_4";
+import * as aws_cis_3_5 from "./rules/aws_cis_3_5";
+import * as aws_cis_3_6 from "./rules/aws_cis_3_6";
+import * as aws_cis_3_7 from "./rules/aws_cis_3_7";
+import * as aws_cis_3_8 from "./rules/aws_cis_3_8";
+import * as aws_cis_3_9 from "./rules/aws_cis_3_9";
+import * as aws_cis_3_10 from "./rules/aws_cis_3_10";
+import * as aws_cis_3_11 from "./rules/aws_cis_3_11";
+import * as aws_cis_3_12 from "./rules/aws_cis_3_12";
+import * as aws_cis_3_13 from "./rules/aws_cis_3_13";
+import * as aws_cis_3_14 from "./rules/aws_cis_3_14";
+
 import * as resource_lifeevent from "./rules/resource_lifeevent";
 
 const rules: Array<models.uguisuRule> = [
   new aws_cis_3_1.rule(),
+  new aws_cis_3_2.rule(),
+  new aws_cis_3_3.rule(),
+  new aws_cis_3_4.rule(),
+  new aws_cis_3_5.rule(),
+  new aws_cis_3_6.rule(),
+  new aws_cis_3_7.rule(),
+  new aws_cis_3_8.rule(),
+  new aws_cis_3_9.rule(),
+  new aws_cis_3_10.rule(),
+  new aws_cis_3_11.rule(),
+  new aws_cis_3_12.rule(),
+  new aws_cis_3_13.rule(),
+  new aws_cis_3_14.rule(),
   new resource_lifeevent.rule(),
 ];
 
