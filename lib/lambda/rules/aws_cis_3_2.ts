@@ -9,7 +9,7 @@ export class rule extends uguisuRule {
       title: "AWS Management Console sign-in without MFA",
       description:
         "AWS CIS benchmark 3.2 recommend to ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA",
-      severity: "medium",
+      severity: "high",
     });
   }
 
