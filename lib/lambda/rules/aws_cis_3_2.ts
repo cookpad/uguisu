@@ -18,7 +18,10 @@ export class rule extends uguisuRule {
       record.eventName === "ConsoleLogin" &&
       record.additionalEventData !== undefined &&
       record.additionalEventData.MFAUsed !== "Yes" &&
-      record.additionalEventData.SamlProviderArn === undefined
+      record.additionalEventData.SamlProviderArn === undefined &&
+      (record.userIdentity.sessionContext === undefined ||
+        record.userIdentity.sessionContext.sessionIssuer === undefined ||
+        record.userIdentity.sessionContext.sessionIssuer.type !== "Role")
     ) {
       return {
         rule: this,
