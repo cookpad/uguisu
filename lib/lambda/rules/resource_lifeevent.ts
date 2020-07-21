@@ -11,12 +11,6 @@ const eventMap: { [key: string]: Array<string> } = {
     "RenewCertificate",
     "DeleteCertificate",
   ],
-  "vpc.amazonaws.com": [
-    "CreateRoute",
-    "DeleteRoute",
-    "CreateSubnet",
-    "DeleteSubnet",
-  ],
 };
 
 export class rule extends uguisuRule {
