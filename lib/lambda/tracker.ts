@@ -125,9 +125,9 @@ function buildAttachment(log: models.detection): MessageAttachment {
   }
 
   const colorMap: { [key: string]: string } = {
-    high: "danger",
-    medium: "warning",
-    low: "good",
+    high: "#A30200",
+    medium: "#F2C744",
+    low: "#2EB886",
   };
   const attachment: MessageAttachment = {
     color: colorMap[log.rule.severity],
