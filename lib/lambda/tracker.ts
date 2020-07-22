@@ -28,7 +28,10 @@ import * as aws_cis_3_12 from "./rules/aws_cis/aws_cis_3_12";
 import * as aws_cis_3_13 from "./rules/aws_cis/aws_cis_3_13";
 import * as aws_cis_3_14 from "./rules/aws_cis/aws_cis_3_14";
 
-import * as resource_lifeevent from "./rules/resource_lifeevent/resource_lifeevent";
+import * as resource_lifeevent_ec2 from "./rules/resource_lifeevent/ec2";
+import * as resource_lifeevent_dynamodb from "./rules/resource_lifeevent/dynamodb";
+import * as resource_lifeevent_rds from "./rules/resource_lifeevent/rds";
+import * as resource_lifeevent_acm from "./rules/resource_lifeevent/acm";
 
 const rules: Array<models.uguisuRule> = [
   new aws_cis_3_1.rule(),
@@ -45,7 +48,10 @@ const rules: Array<models.uguisuRule> = [
   new aws_cis_3_12.rule(),
   new aws_cis_3_13.rule(),
   new aws_cis_3_14.rule(),
-  new resource_lifeevent.rule(),
+  new resource_lifeevent_ec2.rule(),
+  new resource_lifeevent_dynamodb.rule(),
+  new resource_lifeevent_rds.rule(),
+  new resource_lifeevent_acm.rule(),
 ];
 
 export interface arguments {

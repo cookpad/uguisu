@@ -123,7 +123,7 @@ test("Handler basic", async () => {
   expect(msg.attachments[0].blocks).toBeDefined();
   expect(msg.attachments[0].blocks.length).toBe(4);
   expect(msg.attachments[0].blocks[0].text.text).toContain(
-    "Detected: Resource Life Event"
+    "Detected: EC2 Life Event"
   );
   expect(msg.attachments[0].blocks[2].fields).toBeDefined();
   const fields = msg.attachments[0].blocks[2].fields;
@@ -211,7 +211,7 @@ describe("handler variation", async () => {
     expect(chatMsgs.length).toBe(1);
     const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
     expect(msg.attachments[0].blocks[0].text.text).toContain(
-      "Detected: Resource Life Event"
+      "Detected: EC2 Life Event"
     );
   });
 
