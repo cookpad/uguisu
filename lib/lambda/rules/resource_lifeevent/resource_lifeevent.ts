@@ -1,4 +1,4 @@
-import { cloudTrailRecord, uguisuRule, detection } from "../models";
+import { cloudTrailRecord, uguisuRule, detection } from "../../models";
 
 const eventMap: { [key: string]: Array<string> } = {
   "ec2.amazonaws.com": ["RunInstances", "TerminateInstances"],

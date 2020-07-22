@@ -1,4 +1,4 @@
-import { cloudTrailRecord, uguisuRule, detection } from "../models";
+import { cloudTrailRecord, uguisuRule, detection } from "../../models";
 
 // https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.8-remediation
 
