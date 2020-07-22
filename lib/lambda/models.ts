@@ -5,7 +5,7 @@ export interface cloudTrailEvent {
 export interface cloudTrailRecord {
   eventTime: string;
   eventVersion: string;
-  userIdentity: any;
+  userIdentity: { [key: string]: any };
   eventSource: string;
   eventName: string;
   awsRegion: string;
@@ -15,9 +15,9 @@ export interface cloudTrailRecord {
   errorCode?: string;
   errorMessage?: string;
 
-  requestParameters: any;
-  responseElements: any;
-  additionalEventData?: any;
+  requestParameters: { [key: string]: any };
+  responseElements: { [key: string]: any };
+  additionalEventData?: { [key: string]: any };
   requestID: string;
   eventID: string;
   eventType: string;

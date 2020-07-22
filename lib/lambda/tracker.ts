@@ -6,6 +6,8 @@ import {
   ChatPostMessageArguments,
   MessageAttachment,
   MrkdwnElement,
+  SectionBlock,
+  Block,
 } from "@slack/web-api";
 import axios from "axios";
 
@@ -108,10 +110,14 @@ export async function handler(event: SQSEvent, args: arguments) {
 
   console.log("detections:", JSON.stringify(results));
 
+  const detections = remapDetections(results);
+
   const msg: ChatPostMessageArguments = {
     text: "",
     channel: "",
-    attachments: results.map(buildAttachment),
+    attachments: Object.keys(detections).map((k) =>
+      buildAttachment(detections[k])
+    ),
   };
 
   console.log("slackMsg:", JSON.stringify(msg));
@@ -120,67 +126,105 @@ export async function handler(event: SQSEvent, args: arguments) {
   return "ok";
 }
 
-function buildAttachment(log: models.detection): MessageAttachment {
+function remapDetections(
+  logs: Array<models.detection>
+): { [key: string]: Array<models.detection> } {
+  const dtMap: { [key: string]: Array<models.detection> } = {};
+
+  logs.forEach((log: models.detection) => {
+    if (!dtMap[log.rule.id]) {
+      dtMap[log.rule.id] = [];
+    }
+    dtMap[log.rule.id].push(log);
+  });
+
+  return dtMap;
+}
+
+const slackColorMap: { [key: string]: string } = {
+  high: "#A30200",
+  medium: "#F2C744",
+  low: "#2EB886",
+};
+
+function buildAttachment(logs: Array<models.detection>): MessageAttachment {
+  if (logs.length === 0) {
+    return { color: "#999", text: "No data" };
+  }
+
   const toField = (title: string, value: string): MrkdwnElement => {
     return { type: "mrkdwn", text: "*" + title + "*\n" + value };
   };
 
-  const ev = log.event;
-  const fields = [
-    toField("EventName", ev.eventName),
-    toField("EventTime", ev.eventTime),
-    toField("EventID", ev.eventID),
-    toField("Region", ev.awsRegion),
-    toField("AccountID", ev.userIdentity ? ev.userIdentity.accountId : "N/A"),
-    toField("SourceIPAddress", ev.sourceIPAddress ? ev.sourceIPAddress : "N/A"),
-    toField("User", ev.userIdentity ? ev.userIdentity.arn : "N/A"),
-    toField("UserAgent", ev.userAgent ? ev.userAgent : "N/A"),
-  ];
+  const sections = logs
+    .map(
+      (log: models.detection): Array<Block> => {
+        const ev = log.event;
+        const fields = [
+          toField("EventName", ev.eventName),
+          toField("EventTime", ev.eventTime),
+          toField("EventID", ev.eventID),
+          toField("Region", ev.awsRegion),
+          toField("AccountID", ev.userIdentity.accountId),
+          toField("SourceIPAddress", ev.sourceIPAddress),
+          toField("User", ev.userIdentity.arn),
+          toField("UserAgent", ev.userAgent),
+        ];
 
-  if (ev.errorCode) {
-    fields.push(toField("ErrorCode", ev.errorCode));
-  }
-  if (ev.errorMessage) {
-    fields.push(toField("ErrorMessage", ev.errorMessage));
-  }
+        if (ev.errorCode) {
+          fields.push(toField("ErrorCode", ev.errorCode));
+        }
+        if (ev.errorMessage) {
+          fields.push(toField("ErrorMessage", ev.errorMessage));
+        }
 
-  const colorMap: { [key: string]: string } = {
-    high: "#A30200",
-    medium: "#F2C744",
-    low: "#2EB886",
-  };
-  const attachment: MessageAttachment = {
-    color: colorMap[log.rule.severity],
-    blocks: [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "*Detected: " + log.rule.title + "*" },
-      },
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: log.rule.description },
-      },
-      {
-        type: "section",
-        fields: fields,
-      },
-    ],
-  };
+        const blocks: Array<SectionBlock> = [
+          {
+            type: "section",
+            fields: fields,
+          },
+        ];
 
-  if (ev.requestParameters) {
-    const requestParameters = JSON.stringify(
-      log.event.requestParameters,
-      null,
-      2
-    );
-    attachment.blocks?.push({
+        if (ev.requestParameters) {
+          const params = JSON.stringify(ev.requestParameters, null, 2);
+          blocks.push({
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "*RequestParameters*:\n```" + params + "```",
+            },
+          });
+        }
+
+        return blocks;
+      }
+    )
+    .reduce((p, c) => {
+      if (p) {
+        p.push({ type: "divider" });
+      }
+      return p.concat(c);
+    });
+
+  const blockHeader: Array<SectionBlock> = [
+    {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*RequestParameters*:\n```" + requestParameters + "```",
+        text: "*Detected: " + logs[0].rule.title + "*",
       },
-    });
-  }
+    },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: logs[0].rule.description },
+    },
+  ];
+
+  const blocks: Array<Block> = [];
+  const attachment: MessageAttachment = {
+    color: slackColorMap[logs[0].rule.severity],
+    blocks: blocks.concat(blockHeader).concat(sections),
+  };
 
   return attachment;
 }

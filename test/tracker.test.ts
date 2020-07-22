@@ -195,6 +195,7 @@ describe("handler variation", async () => {
           requestParameters: {
             instanceType: "c4.8xlarge",
           },
+          userIdentity: {},
         },
       ],
     };
@@ -213,6 +214,64 @@ describe("handler variation", async () => {
     expect(msg.attachments[0].blocks[0].text.text).toContain(
       "Detected: EC2 Life Event"
     );
+  });
+
+  it("aggregate detections", async () => {
+    const body = {
+      Records: [
+        {
+          awsRegion: "ap-northeast-1",
+          eventID: "x123",
+          eventName: "RunInstances",
+          eventSource: "ec2.amazonaws.com",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {
+            instanceType: "c4.8xlarge",
+          },
+          userIdentity: {},
+        },
+        {
+          awsRegion: "ap-northeast-1",
+          eventID: "x234",
+          eventName: "RunInstances",
+          eventSource: "ec2.amazonaws.com",
+          eventTime: "2020-04-20T12:34:56",
+          eventType: "",
+          eventVersion: "",
+          recipientAccountId: "",
+          requestID: "",
+          requestParameters: {
+            instanceType: "c4.8xlarge",
+          },
+          userIdentity: {},
+        },
+      ],
+    };
+
+    const chatMsgs: Array<ChatPostMessageArguments> = [];
+    const args: arguments = {
+      slackWebhookURL: dummyURL,
+      getObject: newGetObject(body),
+      post: newPost(chatMsgs),
+    };
+
+    const result = await handler(sqsEvent, args);
+    expect(result).toBe("ok");
+    expect(chatMsgs.length).toBe(1);
+    const msg = JSON.parse(JSON.stringify(chatMsgs[0]));
+    expect(msg.attachments[0].blocks[0].text.text).toContain(
+      "Detected: EC2 Life Event"
+    );
+    // block[0]: title
+    // block[1]: description
+    expect(msg.attachments[0].blocks[2].fields[2].text).toContain("x123");
+    // block[3]: requestParameters
+    // block[4]: divider
+    expect(msg.attachments[0].blocks[5].fields[2].text).toContain("x234");
   });
 
   describe("disable rule", () => {
