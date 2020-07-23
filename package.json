@@ -7,9 +7,6 @@
     "url": "https://github.com/m-mizutani/uguisu.git"
   },
   "homepage": "https://github.com/m-mizutani/uguisu",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "scripts": {
     "prepare": "tsc",
     "build": "tsc",
