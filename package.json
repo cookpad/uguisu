@@ -1,6 +1,6 @@
 {
   "name": "uguisu",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description§": "AWS CDK construct to monitor security related event of CloudTrail logs based on AWS CIS benchmark",
   "repository": {
     "type": "git",
