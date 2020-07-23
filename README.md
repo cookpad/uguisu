@@ -4,7 +4,7 @@
 
 `uguisu` is AWS CDK Construct to monitor suspicious activity regarding AWS resource. `uguisu` watches CloudTrail logs and monitors changes of AWS resources. It also have rules to detect an event of interest regarding security. A part of rules is based on AWS CIS benchmark. `uguisu` notifies detail to Slack channel when detecting an event of interest like following.
 
-<img width="640" alt="uguisu" src="https://user-images.githubusercontent.com/605953/88272925-68d43880-cd14-11ea-8515-3b0c67b601d1.png">
+<img width="657" alt="uguisu" src="https://user-images.githubusercontent.com/605953/88273381-147d8880-cd15-11ea-8403-1125f4bed14f.png">
 
 
 By the way, the name of the tool comes from *uguisubari (鶯張り)* that is floors to alarm someone is incoming by a chirping sound when walked upon. In English, it is called *Nightingale floor*. See [wikipedia](https://en.wikipedia.org/wiki/Nightingale_floor) for more detail.
