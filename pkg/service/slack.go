@@ -62,7 +62,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 		blocks = append(blocks, slack.NewDividerBlock())
 		blocks = append(blocks, slack.NewSectionBlock(
-			slack.NewTextBlockObject("mrkdwn", "", false, false), objects, nil),
+			nil, objects, nil),
 		)
 
 		if record.RequestParameters != nil {
@@ -74,12 +74,29 @@ func (x *Slack) Notify(alert *models.Alert) error {
 				param = fmt.Sprintf("%v", record.RequestParameters)
 			}
 
-			blocks = append(blocks,
-				slack.NewTextBlockObject("mrkdwn", fmt.Sprintf("*RequestParameters*:\n```%s```", param), false, false))
+			field := fmt.Sprintf("*RequestParameters*:\n```%s```", param)
+			blocks = append(blocks, slack.NewSectionBlock(
+				slack.NewTextBlockObject("mrkdwn", field, false, false), nil, nil))
 		}
 	}
 
-	msg := slack.NewBlockMessage(blocks...)
+	colorMap := map[models.Severity]string{
+		models.SeverityHigh:   "#A30200",
+		models.SeverityMedium: "#F2C744",
+		models.SeverityLow:    "#2EB886",
+	}
+
+	msg := slack.WebhookMessage{
+		Attachments: []slack.Attachment{
+			{
+				Color: colorMap[alert.Sev],
+				Blocks: slack.Blocks{
+					BlockSet: blocks,
+				},
+			},
+		},
+	}
+
 	raw, err := json.Marshal(msg)
 	if err != nil {
 		return golambda.WrapError(err, "Failed to unmarshal slack message").With("msg", msg)
@@ -96,8 +113,11 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(raw))
 		return golambda.NewError("Failed to post message to slack in API").
-			With("msg", msg).With("code", resp.StatusCode).With("body", string(body))
+			With("msg", msg).
+			With("code", resp.StatusCode).
+			With("body", string(body))
 	}
 
 	return nil
