@@ -47,7 +47,7 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 		},
 	})
 
-	if err := ug.Run(event); err != nil {
+	if err := ug.run(event); err != nil {
 		panic(err)
 	}
 

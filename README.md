@@ -88,17 +88,9 @@ new UguisuStack(app, "secops-uguisu", {
 });
 ```
 
-### Construct options
-
-- You can set `lambdaRoleARN` if you do not want to create a new ServiceRole for uguisu by CDK
-- You can disable specific rule(s) by putting `disableRules`
-  - e.g. `disableRules: "aws_cis_3.4,aws_cis_3.5"`
-  - Rule IDs can be found from [here](https://github.com/m-mizutani/uguisu/tree/master/lib/lambda/rules)
-
 ## 4. Deploy your construct
 
 ```bash
-$ npm run build
 $ cdk deploy
 ```
 

@@ -64,7 +64,7 @@ export class UguisuStack extends cdk.Stack {
           'GOOS=linux GOARCH=amd64 go build -o /asset-output/tracker ' + args.lambdaPackagePath,
         ],
       },
-      exclude: ["node_modules", '*/node_modules'],
+      exclude: ["node_modules", '*/node_modules', 'cdk.out', '*/cdk.out'],
     });
 
     new lambda.Function(this, 'tracker', {
