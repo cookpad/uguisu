@@ -75,7 +75,7 @@ func TestUguisuBasic(t *testing.T) {
 		},
 	})
 
-	require.NoError(t, ug.run(event))
+	require.NoError(t, ug.Run(event))
 	require.Equal(t, 1, len(httpClient.Requests))
 	assert.Equal(t, "test.example.com", httpClient.Requests[0].URL.Host)
 	assert.Equal(t, "/endpoint", httpClient.Requests[0].URL.Path)

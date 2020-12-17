@@ -40,14 +40,15 @@ func New() *Uguisu {
 // Start invokes lambda.Start via golambda.Start. Start() manage not only main procedure but also error handling. Then a developer to use uguisu need to configure uguisu before calling Start().
 func (x *Uguisu) Start() {
 	golambda.Start(func(event golambda.Event) (interface{}, error) {
-		if err := x.run(event); err != nil {
+		if err := x.Run(event); err != nil {
 			return nil, err
 		}
 		return nil, nil
 	})
 }
 
-func (x *Uguisu) run(event golambda.Event) error {
+// Run is invoked without golambda.Start. It's exported for testing
+func (x *Uguisu) Run(event golambda.Event) error {
 	messages, err := event.DecapSNSonSQSMessage()
 	if err != nil {
 		return err
