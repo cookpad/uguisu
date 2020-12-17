@@ -6,12 +6,11 @@ import * as path from 'path';
 
 const app = new cdk.App();
 new UguisuStack(app, process.env.UGUISU_STACK_NAME!, {
-  lambdaBuildPath:  path.resolve('.'),
+  lambdaBuildPath:  path.resolve(__dirname, '..'),
   lambdaPackagePath: './lambda/tracker',
   snsTopicARN: process.env.UGUISU_SNS_TOPIC!,
   lambdaRoleARN: process.env.UGUISU_LAMBDA_ROLE,
   s3BucketName: process.env.UGUISU_S3_BUCKET_NAME,
   slackWebhookURL: process.env.UGUISU_SLACK_WEBHOOK!,
   sentryDSN: process.env.UGUISU_SENTRY_DSN,
-  disableRules: process.env.UGUISU_DISABLE_RULES,
 });

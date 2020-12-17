@@ -11,12 +11,13 @@ import * as path from "path";
 export interface Arguments {
   lambdaBuildPath: string;
   lambdaPackagePath: string;
-  snsTopicARN: string;
   lambdaRoleARN?: string;
+
+  snsTopicARN: string;
   s3BucketName?: string;
+
   slackWebhookURL: string;
   sentryDSN?: string;
-  disableRules?: string;
 }
 
 export class UguisuStack extends cdk.Stack {
@@ -62,7 +63,6 @@ export class UguisuStack extends cdk.Stack {
           '-c',
           'GOOS=linux GOARCH=amd64 go build -o /asset-output/tracker ' + args.lambdaPackagePath,
         ],
-
       },
       exclude: ["node_modules", '*/node_modules'],
     });
@@ -77,10 +77,9 @@ export class UguisuStack extends cdk.Stack {
       environment: {
         SLACK_WEBHOOK_RUL: args.slackWebhookURL,
         SENTRY_DSN: args.sentryDSN || "",
-        DISABLE_RULES: args.disableRules || "",
       },
       events: [new SqsEventSource(this.s3EventQueue, { batchSize: 10 })],
-      reservedConcurrentExecutions: 1,
+      reservedConcurrentExecutions: 5,
     });
 
     if (!lambdaRole && args.s3BucketName) {
