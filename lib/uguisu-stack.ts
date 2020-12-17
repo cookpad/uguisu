@@ -6,13 +6,11 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
-import {
-  NodejsFunction,
-  NodejsFunctionProps,
-} from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
 export interface Arguments {
+  lambdaBuildPath: string;
+  lambdaPackagePath: string;
   snsTopicARN: string;
   lambdaRoleARN?: string;
   s3BucketName?: string;
@@ -46,29 +44,46 @@ export class UguisuStack extends cdk.Stack {
     const topic = sns.Topic.fromTopicArn(this, "s3Event", args.snsTopicARN);
     topic.addSubscription(new SqsSubscription(this.s3EventQueue));
 
-    const role = args.lambdaRoleARN
-      ? iam.Role.fromRoleArn(this, "Lambda", args.lambdaRoleARN, {
+    const lambdaRole = args.lambdaRoleARN
+      ? iam.Role.fromRoleArn(this, "LambdaRole", args.lambdaRoleARN, {
           mutable: false,
         })
       : undefined;
 
-    const prop: NodejsFunctionProps = {
-      entry: path.join(__dirname, "lambda/tracker.js"),
-      handler: "main",
+    // const buildPath = path.resolve(__dirname, '../build');
+    const assertPath = lambda.Code.fromAsset(args.lambdaBuildPath, {
+      bundling: {
+        image: lambda.Runtime.GO_1_X.bundlingDockerImage,
+        user: 'root',
+        // command: ['find'],
+
+        command: [
+          'bash',
+          '-c',
+          'GOOS=linux GOARCH=amd64 go build -o /asset-output/tracker ' + args.lambdaPackagePath,
+        ],
+
+      },
+      exclude: ["node_modules", '*/node_modules'],
+    });
+
+    new lambda.Function(this, 'tracker', {
+      runtime: lambda.Runtime.GO_1_X,
+      handler: 'tracker',
+      code: assertPath,
+      role: lambdaRole,
       timeout: cdk.Duration.seconds(300),
       memorySize: 1024,
-      role: role,
-      events: [new SqsEventSource(this.s3EventQueue, { batchSize: 1 })],
       environment: {
         SLACK_WEBHOOK_RUL: args.slackWebhookURL,
         SENTRY_DSN: args.sentryDSN || "",
         DISABLE_RULES: args.disableRules || "",
       },
-    };
+      events: [new SqsEventSource(this.s3EventQueue, { batchSize: 10 })],
+      reservedConcurrentExecutions: 1,
+    });
 
-    this.tracker = new NodejsFunction(this, "tracker", prop);
-
-    if (!role && args.s3BucketName) {
+    if (!lambdaRole && args.s3BucketName) {
       const bucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
         bucketArn: "arn:aws:s3:::" + args.s3BucketName,
       });
