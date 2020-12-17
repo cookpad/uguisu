@@ -30,7 +30,9 @@ func putData(client *mock.S3Client, region, bucket, key string, records []*model
 
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
-	gz.Write(raw)
+	if _, err := gz.Write(raw); err != nil {
+		panic(err)
+	}
 	gz.Close()
 
 	_, err = client.PutObject(&s3.PutObjectInput{
@@ -63,7 +65,7 @@ func TestUguisuBasic(t *testing.T) {
 	})
 
 	var event golambda.Event
-	event.EncapSNSonSQSMessage(events.S3Event{
+	require.NoError(t, event.EncapSNSonSQSMessage(events.S3Event{
 		Records: []events.S3EventRecord{
 			{
 				AWSRegion: s3Region,
@@ -73,7 +75,7 @@ func TestUguisuBasic(t *testing.T) {
 				},
 			},
 		},
-	})
+	}))
 
 	require.NoError(t, ug.run(event))
 	require.Equal(t, 1, len(httpClient.Requests))

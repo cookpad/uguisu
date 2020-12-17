@@ -26,5 +26,5 @@ func (x *lifeEventRDS) Description() string {
 
 func (x *lifeEventRDS) Match(record *models.CloudTrailRecord) bool {
 	return record.EventSource == "rds.amazonaws.com" &&
-		x.targetEvents[record.EventName] == true
+		x.targetEvents[record.EventName]
 }

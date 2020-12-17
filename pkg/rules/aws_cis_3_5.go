@@ -28,5 +28,5 @@ func (x *awsCIS3_5) Description() string {
 	return "AWS CIS benchmark 3.5 recommend to ensure a log metric filter and alarm exist for CloudTrail configuration changes"
 }
 func (x *awsCIS3_5) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName] == true
+	return x.targetEvents[record.EventName]
 }

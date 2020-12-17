@@ -101,7 +101,7 @@ func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rule
 		alerts := rules.Detect(record)
 
 		for _, alert := range alerts {
-			if filters.filter(alert) == false {
+			if !filters.filter(alert) {
 				continue
 			}
 
@@ -145,7 +145,10 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
-	gz.Write(raw)
+	_, err = gz.Write(raw)
+	if err != nil {
+		panic(err)
+	}
 	gz.Close()
 
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
@@ -158,7 +161,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 	}
 
 	var event golambda.Event
-	event.EncapSNSonSQSMessage(events.S3Event{
+	err = event.EncapSNSonSQSMessage(events.S3Event{
 		Records: []events.S3EventRecord{
 			{
 				AWSRegion: s3Region,
@@ -169,6 +172,9 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 			},
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	if err := x.run(event); err != nil {
 		panic(err)
@@ -182,7 +188,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		}
 
 		for _, record := range records {
-			if strings.Index(string(data), record.EventID) >= 0 {
+			if strings.Contains(string(data), record.EventID) {
 				detected = append(detected, record)
 			}
 		}

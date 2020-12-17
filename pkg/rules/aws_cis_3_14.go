@@ -33,5 +33,5 @@ func (x *awsCIS3_14) Description() string {
 	return "AWS CIS benchmark 3.14 recommend to ensure a log metric filter and alarm exist for VPC changes"
 }
 func (x *awsCIS3_14) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName] == true
+	return x.targetEvents[record.EventName]
 }

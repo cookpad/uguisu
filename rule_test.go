@@ -35,7 +35,7 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 	putData(s3Client, s3Region, s3Bucket, s3Key, records)
 
 	var event golambda.Event
-	event.EncapSNSonSQSMessage(events.S3Event{
+	err := event.EncapSNSonSQSMessage(events.S3Event{
 		Records: []events.S3EventRecord{
 			{
 				AWSRegion: s3Region,
@@ -46,6 +46,9 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 			},
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	if err := ug.run(event); err != nil {
 		panic(err)

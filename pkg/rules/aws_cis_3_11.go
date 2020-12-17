@@ -29,5 +29,5 @@ func (x *awsCIS3_11) Description() string {
 	return "AWS CIS benchmark 3.11 recommend to ensure a log metric filter and alarm exist for Network Access Control Lists (NACL)"
 }
 func (x *awsCIS3_11) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName] == true
+	return x.targetEvents[record.EventName]
 }

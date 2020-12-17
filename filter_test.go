@@ -11,7 +11,7 @@ import (
 type dropCIS3_4 struct{}
 
 func (x *dropCIS3_4) Filter(alert *models.Alert) bool {
-	if alert.RuleID == "aws_cis_3.4" {
+	if alert.RuleID == "aws_cis_3.4" { // nolint
 		return false
 	}
 

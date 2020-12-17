@@ -19,7 +19,7 @@ func (x AlertFilters) filter(alert *models.Alert) bool {
 	}
 
 	for _, filter := range x {
-		if filter.Filter(alert) == false {
+		if !filter.Filter(alert) {
 			return false
 		}
 	}

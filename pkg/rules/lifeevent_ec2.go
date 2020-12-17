@@ -31,5 +31,5 @@ func (x *lifeEventEC2) Match(record *models.CloudTrailRecord) bool {
 	}
 
 	return record.EventSource == "ec2.amazonaws.com" &&
-		x.targetEvents[record.EventName] == true
+		x.targetEvents[record.EventName]
 }
