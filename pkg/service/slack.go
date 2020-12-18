@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/m-mizutani/golambda"
 	"github.com/m-mizutani/uguisu/pkg/adaptor"
@@ -43,27 +44,25 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	}
 
 	for _, record := range alert.Events {
-		objects := []*slack.TextBlockObject{
-			newField("EventName", record.EventName),
-			newField("EventTime", record.EventTime),
-			newField("EventID", record.EventID),
-			newField("Region", record.AwsRegion),
-			newField("AccountID", record.UserIdentity.AccountID),
-			newField("SourceIPAddress", record.SourceIPAddress),
-			newField("User", record.UserIdentity.ARN),
-			newField("UserAgent", record.UserAgent),
-		}
+		eventDescription := strings.Join([]string{
+			fmt.Sprintf("*%s*", record.EventName),
+			fmt.Sprintf("- %s @ %s", record.RecipientAccountID, record.AwsRegion),
+			fmt.Sprintf("- by `%s`", record.UserIdentity.ARN),
+			fmt.Sprintf("- from %s", record.SourceIPAddress),
+		}, "\n")
+
+		var errors []*slack.TextBlockObject
 		if record.ErrorCode != nil {
-			objects = append(objects, newField("ErrorCode", *record.ErrorCode))
+			errors = append(errors, newField("ErrorCode", *record.ErrorCode))
 		}
 		if record.ErrorMessage != nil {
-			objects = append(objects, newField("ErrorMessage", *record.ErrorMessage))
+			errors = append(errors, newField("ErrorMessage", *record.ErrorMessage))
 		}
 
-		blocks = append(blocks, slack.NewDividerBlock())
-		blocks = append(blocks, slack.NewSectionBlock(
-			nil, objects, nil),
-		)
+		blocks = append(blocks, []slack.Block{
+			slack.NewDividerBlock(),
+			slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", eventDescription, false, false), errors, nil),
+		}...)
 
 		if record.RequestParameters != nil {
 			raw, err := json.MarshalIndent(record.RequestParameters, "", "  ")
@@ -78,6 +77,26 @@ func (x *Slack) Notify(alert *models.Alert) error {
 			blocks = append(blocks, slack.NewSectionBlock(
 				slack.NewTextBlockObject("mrkdwn", field, false, false), nil, nil))
 		}
+
+		footer := strings.Join([]string{
+			fmt.Sprintf("ID: %s", record.EventID),
+			fmt.Sprintf("UserAgent: %s", record.UserAgent),
+		}, "\n")
+		blocks = append(blocks, slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", footer, false, false)))
+
+		/*
+			objects := []*slack.TextBlockObject{
+				newField("EventName", record.EventName),
+				newField("EventTime", record.EventTime),
+				newField("EventID", record.EventID),
+				newField("Region", record.AwsRegion),
+				newField("AccountID", record.UserIdentity.AccountID),
+				newField("SourceIPAddress", record.SourceIPAddress),
+				newField("User", record.UserIdentity.ARN),
+				newField("UserAgent", record.UserAgent),
+			}
+		*/
+
 	}
 
 	colorMap := map[models.Severity]string{

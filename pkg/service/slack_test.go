@@ -21,17 +21,22 @@ func TestSlackIntegrtion(t *testing.T) {
 	require.NoError(t, slack.Notify(&models.Alert{
 		Title:       "Test alert",
 		RuleID:      "test_rule_id",
-		Sev:         models.SeverityLow,
+		Sev:         models.SeverityMedium,
 		Description: "this is test. please ignore me",
 		Events: []*models.CloudTrailRecord{
 			{
-				EventTime:       "2020-01-02T15:04:05",
-				SourceIPAddress: "10.1.2.3",
-				EventName:       "TestEvent",
-				UserAgent:       "my-user-agent",
-				ErrorCode:       aws.String("some-error"),
+				EventTime:          "2020-01-02T15:04:05",
+				SourceIPAddress:    "10.1.2.3",
+				EventName:          "TestEvent",
+				UserAgent:          "my-user-agent",
+				ErrorCode:          aws.String("some-error"),
+				RecipientAccountID: "1111111111111",
+				AwsRegion:          "ap-northeast-1",
 				RequestParameters: map[string]interface{}{
 					"test": "message",
+				},
+				UserIdentity: models.CloudTrailUserIdentity{
+					ARN: `arn:aws:sts::11111111111111:assumed-role/TestRole/xxxxxxxxxxxxx`,
 				},
 			},
 		},
