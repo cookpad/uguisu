@@ -70,12 +70,12 @@ func (x *Uguisu) run(event golambda.Event) error {
 	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL)
 
 	for _, event := range messages {
-		logger.With("event", string(event)).Info("event proessing")
+		logger.With("event", string(event)).Trace("event proessing")
 		var s3Event events.S3Event
 		if err := event.Bind(&s3Event); err != nil {
 			return err
 		}
-		logger.With("s3Event", s3Event).Info("Binding s3Event")
+		logger.With("s3Event", s3Event).Trace("Binding s3Event")
 
 		for _, s3Record := range s3Event.Records {
 			if err := handleS3Object(
@@ -115,7 +115,7 @@ func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rule
 		}
 	}
 
-	logger.With("processed", len(records)).Info("handleS3Object completed")
+	logger.With("processed", len(records)).Trace("handleS3Object completed")
 
 	return nil
 }

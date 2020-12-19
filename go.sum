@@ -89,6 +89,8 @@ github.com/labstack/echo/v4 v4.1.11/go.mod h1:i541M3Fj6f76NZtHSj7TXnyM8n2gaodfvf
 github.com/labstack/gommon v0.3.0/go.mod h1:MULnywXg0yavhxWKc+lOruYdAhDwPK9wf0OL7NoOu+k=
 github.com/m-mizutani/golambda v0.0.0-20201213045337-c0ce28840bc1 h1:NlPpoJT50MSNzjmDzadWf1FKO+0nKGKEOm5UCKaAcqs=
 github.com/m-mizutani/golambda v0.0.0-20201213045337-c0ce28840bc1/go.mod h1:lu0t64PD3IKezJ6yoFwkUNqH5Bct/n8k3Fcyg9JjU6w=
+github.com/m-mizutani/golambda v0.0.0-20201219013117-1aeb21a0bdd8 h1:+fnEi4EnAwp6Ds+pYP0VhTtpNfTBqTVmIQAwKw0rG08=
+github.com/m-mizutani/golambda v0.0.0-20201219013117-1aeb21a0bdd8/go.mod h1:lu0t64PD3IKezJ6yoFwkUNqH5Bct/n8k3Fcyg9JjU6w=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.7/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
