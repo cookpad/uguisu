@@ -41,6 +41,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	blocks := []slack.Block{
 		slack.NewHeaderBlock(slack.NewTextBlockObject("plain_text", alert.Title, true, false)),
 		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", alert.Description, false, false), nil, nil),
+		slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", "RuleID: "+alert.RuleID, false, false)),
 	}
 
 	for _, record := range alert.Events {
@@ -79,7 +80,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		}
 
 		footer := strings.Join([]string{
-			fmt.Sprintf("ID: %s", record.EventID),
+			fmt.Sprintf("ID: %s (%s)", record.EventID, record.EventTime),
 			fmt.Sprintf("UserAgent: %s", record.UserAgent),
 		}, "\n")
 		blocks = append(blocks, slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", footer, false, false)))
