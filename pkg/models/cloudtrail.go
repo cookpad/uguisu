@@ -30,7 +30,7 @@ type CloudTrailRecord struct {
 	ReadOnly            bool                           `json:"readOnly"`
 	Resources           interface{}                    `json:"resources,omitempty"`
 	RecipientAccountID  string                         `json:"recipientAccountId"`
-	ServiceEventDetails string                         `json:"serviceEventDetails"`
+	ServiceEventDetails map[string]interface{}         `json:"serviceEventDetails"`
 	SharedEventID       string                         `json:"sharedEventID"`
 	VpcEndpointID       string                         `json:"vpcEndpointId"`
 	EventCategory       string                         `json:"eventCategory"`
