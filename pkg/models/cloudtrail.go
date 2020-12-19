@@ -2,7 +2,7 @@ package models
 
 // CloudTrailLogObject represents S3 object data of CloudTrail log
 type CloudTrailLogObject struct {
-	Records []*CloudTrailRecord `json:"Record"`
+	Records []*CloudTrailRecord `json:"Records"`
 }
 
 // CloudTrailRecord represents one event log of CloudTrail

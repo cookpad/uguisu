@@ -6,7 +6,6 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as s3 from "@aws-cdk/aws-s3";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
-import * as path from "path";
 
 export interface Arguments {
   lambdaBuildPath: string;
@@ -75,7 +74,7 @@ export class UguisuStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(300),
       memorySize: 1024,
       environment: {
-        SLACK_WEBHOOK_RUL: args.slackWebhookURL,
+        SLACK_WEBHOOK_URL: args.slackWebhookURL,
         SENTRY_DSN: args.sentryDSN || "",
       },
       events: [new SqsEventSource(this.s3EventQueue, { batchSize: 10 })],
