@@ -8,9 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type dropCIS3_4 struct{}
-
-func (x *dropCIS3_4) Filter(alert *models.Alert) bool {
+func dropCIS3_4Filter(alert *models.Alert) bool {
 	if alert.RuleID == "aws_cis_3.4" { // nolint
 		return false
 	}
@@ -30,7 +28,7 @@ func TestFilterDrop(t *testing.T) {
 
 	t.Run("dropCIS3_4", func(t *testing.T) {
 		ug := uguisu.New()
-		ug.Filters = append(ug.Filters, &dropCIS3_4{})
+		ug.Filters = append(ug.Filters, dropCIS3_4Filter)
 
 		t.Run("drops CIS 3.4 alert", func(t *testing.T) {
 			detected := ug.Test([]*models.CloudTrailRecord{
