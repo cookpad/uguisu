@@ -12,6 +12,8 @@ github.com/aws/aws-lambda-go v1.20.0 h1:ZSweJx/Hy9BoIDXKBEh16vbHH0t0dehnF8MKpMiO
 github.com/aws/aws-lambda-go v1.20.0/go.mod h1:jJmlefzPfGnckuHdXX7/80O3BvUUi12XOkbv4w9SGLU=
 github.com/aws/aws-sdk-go v1.36.8 h1:3nvY3Ax2RC6PN1i0OKppxjq3doHWqiYtvenLQ/oZ5jI=
 github.com/aws/aws-sdk-go v1.36.8/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.36.12 h1:YJpKFEMbqEoo+incs5qMe61n1JH3o4O1IMkMexLzJG8=
+github.com/aws/aws-sdk-go v1.36.12/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0/go.mod h1:4Zcjuz89kmFXt9morQgcfYZAYZ5n8WHjt81YYWIwtTM=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
@@ -91,6 +93,8 @@ github.com/m-mizutani/golambda v0.0.0-20201213045337-c0ce28840bc1 h1:NlPpoJT50MS
 github.com/m-mizutani/golambda v0.0.0-20201213045337-c0ce28840bc1/go.mod h1:lu0t64PD3IKezJ6yoFwkUNqH5Bct/n8k3Fcyg9JjU6w=
 github.com/m-mizutani/golambda v0.0.0-20201219013117-1aeb21a0bdd8 h1:+fnEi4EnAwp6Ds+pYP0VhTtpNfTBqTVmIQAwKw0rG08=
 github.com/m-mizutani/golambda v0.0.0-20201219013117-1aeb21a0bdd8/go.mod h1:lu0t64PD3IKezJ6yoFwkUNqH5Bct/n8k3Fcyg9JjU6w=
+github.com/m-mizutani/golambda v0.0.0-20201221041157-21ec5e11f402 h1:o8QPRiu1uLDjjllgGwrBxNhDRA+hRUdvATynCOs75hI=
+github.com/m-mizutani/golambda v0.0.0-20201221041157-21ec5e11f402/go.mod h1:qUqQ4qX270xOxkhqH/sut5QDtBOy3n+4150FaYlwg4Q=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.7/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
