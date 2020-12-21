@@ -74,6 +74,10 @@ func (x *Slack) Notify(alert *models.Alert) error {
 				param = fmt.Sprintf("%v", record.RequestParameters)
 			}
 
+			if len(param) > 1000 {
+				param = param[:1000]
+			}
+
 			field := fmt.Sprintf("*RequestParameters*:\n```%s```", param)
 			blocks = append(blocks, slack.NewSectionBlock(
 				slack.NewTextBlockObject("mrkdwn", field, false, false), nil, nil))
