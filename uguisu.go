@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -61,6 +62,10 @@ func (x *Uguisu) Start() {
 
 // run is invoked without golambda.Start. It's exported for testing
 func (x *Uguisu) run(event golambda.Event) error {
+	for _, filter := range x.Filters {
+		logger.With("filter(addr)", fmt.Sprintf("%v", filter)).Debug("Set filter")
+	}
+
 	messages, err := event.DecapSNSonSQSMessage()
 	if err != nil {
 		return err

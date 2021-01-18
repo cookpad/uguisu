@@ -1,6 +1,11 @@
 package uguisu
 
-import "github.com/m-mizutani/uguisu/pkg/models"
+import (
+	"fmt"
+
+	"github.com/m-mizutani/golambda"
+	"github.com/m-mizutani/uguisu/pkg/models"
+)
 
 // Filter is interface to modify or drop detected alert before notifying
 type Filter func(alert *models.Alert) bool
@@ -15,6 +20,7 @@ func (x AlertFilters) filter(alert *models.Alert) bool {
 
 	for _, filter := range x {
 		if !filter(alert) {
+			golambda.Logger.With("filter", fmt.Sprintf("%v", filter)).Debug("Alert filtered")
 			return false
 		}
 	}
