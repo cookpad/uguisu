@@ -60,15 +60,15 @@ export class UguisuStack extends cdk.Stack {
         command: [
           'bash',
           '-c',
-          'GOOS=linux GOARCH=amd64 go build -o /asset-output/tracker ' + args.lambdaPackagePath,
+          'GOOS=linux GOARCH=amd64 go build -o /asset-output/bootstrap ' + args.lambdaPackagePath,
         ],
       },
       exclude: ["node_modules", '*/node_modules', 'cdk.out', '*/cdk.out'],
     });
 
     new lambda.Function(this, 'tracker', {
-      runtime: lambda.Runtime.GO_1_X,
-      handler: 'tracker',
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      handler: 'bootstrap',
       code: assertPath,
       role: lambdaRole,
       timeout: cdk.Duration.seconds(300),
