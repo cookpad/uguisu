@@ -12,7 +12,7 @@
     "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true})}catch(e){}})\"",
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "eslint",
+    "lint": "eslint . --ext .ts,.js --max-warnings=0",
     "test": "tsc; jest",
     "cdk": "cdk"
   },
