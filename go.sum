@@ -48,15 +48,6 @@ github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.15 h1:edCcNp9eGIUDUCrzoCu1jWA
 github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.15/go.mod h1:lyRQKED9xWfgkYC/wmmYfv7iVIM68Z5OQ88ZdcV1QbU=
 github.com/aws/aws-sdk-go-v2/service/sts v1.41.7 h1:NITQpgo9A5NrDZ57uOWj+abvXSb83BbyggcUBVksN7c=
 github.com/aws/aws-sdk-go-v2/service/sts v1.41.7/go.mod h1:sks5UWBhEuWYDPdwlnRFn1w7xWdH29Jcpe+/PJQefEs=
-<<<<<<< HEAD
-=======
-github.com/aws/constructs-go/constructs/v10 v10.5.1 h1:GYyCMb2QmJl/o4EMbS3LVqh/kRlLLBVsxzmV40jxOKY=
-github.com/aws/constructs-go/constructs/v10 v10.5.1/go.mod h1:ZvLfkgiTKlbQhPYkZhWk+hPkevdX55ZeXQ2XqfC3xTw=
-github.com/aws/constructs-go/constructs/v3 v3.4.344 h1:wj+DLqyVWc1ujffTw+M3tGVKsOOjJv5PeDsP4LzxVL8=
-github.com/aws/constructs-go/constructs/v3 v3.4.344/go.mod h1:WYmZlmHWrQk5EAd30zZO/reLvE62Va920Cpgcc1Yp+k=
-github.com/aws/jsii-runtime-go v1.127.0 h1:eWnSOt0oR70WD0MA4nIBdBCykJpnfsYhVxA9hIhfv+U=
-github.com/aws/jsii-runtime-go v1.127.0/go.mod h1:gun/1AY7mrOnd/oVbAGxETnU8iXoPzr8AO2eyGvnCx8=
->>>>>>> b2ac3ef (Add tests for ts code)
 github.com/aws/smithy-go v1.24.1 h1:VbyeNfmYkWoxMVpGUAbQumkODcYmfMRfZ8yQiH30SK0=
 github.com/aws/smithy-go v1.24.1/go.mod h1:LEj2LM3rBRQJxPZTB4KuzZkaZYnZPnvgIhb4pu07mx0=
 github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
