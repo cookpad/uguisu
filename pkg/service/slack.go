@@ -137,7 +137,6 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		fmt.Println(string(raw))
 		return golambda.NewError("Failed to post message to slack in API").
 			With("msg", msg).
 			With("code", resp.StatusCode).

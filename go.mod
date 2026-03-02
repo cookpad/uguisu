@@ -6,7 +6,6 @@ require (
 	github.com/Netflix/go-env v0.0.0-20201103003909-014a952cefe2
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.241.0
 	github.com/aws/aws-lambda-go v1.20.0
-	github.com/aws/aws-sdk-go v1.36.12
 	github.com/aws/aws-sdk-go-v2 v1.41.2
 	github.com/aws/aws-sdk-go-v2/config v1.32.10
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.2
@@ -20,6 +19,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
+	github.com/aws/aws-sdk-go v1.36.12 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.5 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.10 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.18 // indirect
