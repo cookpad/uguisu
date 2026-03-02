@@ -66,7 +66,7 @@ export class UguisuStack extends cdk.Stack {
       exclude: ["node_modules", '*/node_modules', 'cdk.out', '*/cdk.out'],
     });
 
-    new lambda.Function(this, 'tracker', {
+    this.tracker = new lambda.Function(this, 'tracker', {
       runtime: lambda.Runtime.GO_1_X,
       handler: 'tracker',
       code: assertPath,
