@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/uuid"
 	"github.com/m-mizutani/golambda"
 	"github.com/cookpad/uguisu/pkg/mock"
