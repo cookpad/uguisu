@@ -1,12 +1,42 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
-    branches: ["**"]
+
+permissions:
+  contents: read
 
 jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run TypeScript lint
+        run: npm run lint
+
   test:
     runs-on: ubuntu-22.04
+    needs: lint
     strategy:
       matrix:
         go-version: ["1.25.x"]
@@ -21,5 +51,16 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Run tests
+      - name: Run Go tests
         run: go test ./...
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run TypeScript tests
+        run: npm test
