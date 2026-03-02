@@ -11,8 +11,10 @@ import (
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 	"github.com/m-mizutani/golambda"
 
@@ -162,7 +164,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 	}
 	gz.Close()
 
-	_, err = s3Client.PutObject(&s3.PutObjectInput{
+	_, err = s3Client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),
 		Key:    aws.String(s3Key),
 		Body:   bytes.NewReader(buf.Bytes()),
