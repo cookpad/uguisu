@@ -39,7 +39,7 @@
     "@aws-cdk/aws-sqs": "1.75.0",
     "@aws-cdk/core": "1.75.0",
     "@types/aws-lambda": "^8.10.57",
-    "aws-sdk": "^2.709.0",
+    "aws-sdk": "^2.814.0",
     "source-map-support": "^0.5.16"
   },
   "cdk-lambda": "/asset-output/index.js",
