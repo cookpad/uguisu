@@ -60,7 +60,7 @@ func TestUguisuBasic(t *testing.T) {
 
 	s3Region := "us-east-0"
 	s3Bucket := "your-ct-logs"
-	s3Key := "some/object/" + uuid.New().String()
+	s3Key := "some/object/" + uuid.New().String() + ".json.gz"
 
 	putData(s3Client, s3Region, s3Bucket, s3Key, []*models.CloudTrailRecord{
 		{

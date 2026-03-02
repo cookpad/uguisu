@@ -2,10 +2,8 @@ package mock
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 	"io"
-	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -47,13 +45,8 @@ func (x *S3Client) GetObject(ctx context.Context, input *s3.GetObjectInput, optF
 		return nil, &types.NoSuchKey{}
 	}
 
-	gz, err := gzip.NewReader(bytes.NewReader(obj))
-	if err != nil {
-		log.Fatal("gzip error in GetObject: ", err)
-	}
-
 	return &s3.GetObjectOutput{
-		Body: gz,
+		Body: io.NopCloser(bytes.NewReader(obj)),
 	}, nil
 }
 

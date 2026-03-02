@@ -1,8 +1,11 @@
 package service
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
+	"io"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -36,8 +39,19 @@ func (x *CloudTrailLogs) Read(s3Region, s3Bucket, s3Key string) ([]*models.Cloud
 	if err != nil {
 		return nil, golambda.WrapError(err, "Failed to download cloudtrail log object").With("input", input)
 	}
+	defer output.Body.Close() //nolint:errcheck
 
-	decoder := json.NewDecoder(output.Body)
+	var reader io.Reader = output.Body
+	if strings.HasSuffix(s3Key, ".gz") {
+		gz, err := gzip.NewReader(output.Body)
+		if err != nil {
+			return nil, golambda.WrapError(err, "Failed to create gzip reader for CloudTrail log").With("input", input)
+		}
+		defer gz.Close() //nolint:errcheck
+		reader = gz
+	}
+
+	decoder := json.NewDecoder(reader)
 	var object models.CloudTrailLogObject
 	if err := decoder.Decode(&object); err != nil {
 		return nil, golambda.WrapError(err, "Failed to decode CloudTrail logs").With("input", input)
