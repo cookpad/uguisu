@@ -1,7 +1,8 @@
 *.js
 !jest.config.js
 *.d.ts
-node_modules
+node_modules/*
+!node_modules/go.mod
 
 # CDK asset staging directory
 .cdk.staging
