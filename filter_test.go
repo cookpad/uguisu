@@ -3,8 +3,8 @@ package uguisu_test
 import (
 	"testing"
 
-	"github.com/m-mizutani/uguisu"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu"
+	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
 

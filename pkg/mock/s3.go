@@ -2,13 +2,12 @@ package mock
 
 import (
 	"bytes"
-	"compress/gzip"
-	"errors"
-	"io/ioutil"
-	"log"
+	"context"
+	"io"
 
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/cookpad/uguisu/pkg/adaptor"
 )
 
 var s3Objects map[string]map[string][]byte
@@ -35,35 +34,30 @@ func NewS3Client(region string) (adaptor.S3Client, error) {
 	return &S3Client{}, nil
 }
 
-func (x *S3Client) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+func (x *S3Client) GetObject(ctx context.Context, input *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
 	bucket, ok := s3Objects[*input.Bucket]
 	if !ok {
-		return nil, errors.New(s3.ErrCodeNoSuchBucket)
+		return nil, &types.NoSuchBucket{}
 	}
 
 	obj, ok := bucket[*input.Key]
 	if !ok {
-		return nil, errors.New(s3.ErrCodeNoSuchKey)
-	}
-
-	gz, err := gzip.NewReader(bytes.NewReader(obj))
-	if err != nil {
-		log.Fatal("gzip error in GetObject: ", err)
+		return nil, &types.NoSuchKey{}
 	}
 
 	return &s3.GetObjectOutput{
-		Body: gz,
+		Body: io.NopCloser(bytes.NewReader(obj)),
 	}, nil
 }
 
-func (x *S3Client) PutObject(input *s3.PutObjectInput) (*s3.PutObjectOutput, error) {
+func (x *S3Client) PutObject(ctx context.Context, input *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
 	memBucket, ok := s3Objects[*input.Bucket]
 	if !ok {
 		memBucket = make(map[string][]byte)
 		s3Objects[*input.Bucket] = memBucket
 	}
 
-	data, err := ioutil.ReadAll(input.Body)
+	data, err := io.ReadAll(input.Body)
 	if err != nil {
 		return &s3.PutObjectOutput{}, err
 	}

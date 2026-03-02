@@ -1,7 +1,7 @@
 package rules
 
 import (
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 // CIS 3.7 – Ensure a log metric filter and alarm exist for unauthorized API calls

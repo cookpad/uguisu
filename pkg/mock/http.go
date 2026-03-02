@@ -2,7 +2,6 @@ package mock
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -22,7 +21,7 @@ func (x *HTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}
 	body := x.RespBody
 	if body == nil {
-		body = ioutil.NopCloser(strings.NewReader("OK"))
+		body = io.NopCloser(strings.NewReader("OK"))
 	}
 
 	return &http.Response{
@@ -32,7 +31,7 @@ func (x *HTTPClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func (x *HTTPClient) Body(n int) string {
-	if len(x.Requests) < n {
+	if n >= len(x.Requests) {
 		panic("n is too large")
 	}
 
@@ -40,8 +39,8 @@ func (x *HTTPClient) Body(n int) string {
 	if err != nil {
 		panic(err)
 	}
-
-	raw, err := ioutil.ReadAll(body)
+	defer body.Close() //nolint:errcheck
+	raw, err := io.ReadAll(body)
 	if err != nil {
 		panic(err)
 	}

@@ -1,13 +1,13 @@
-# Uguisu [![Build Status](https://travis-ci.org/m-mizutani/uguisu.svg?branch=master)](https://travis-ci.org/m-mizutani/uguisu)
+# Uguisu
 
 ![icon](https://user-images.githubusercontent.com/605953/74091901-6d0eef80-4b00-11ea-88c4-b4ae90cd3331.png)
 
-`uguisu` is AWS CDK Construct to monitor suspicious activity regarding AWS resource. `uguisu` watches CloudTrail logs and monitors changes of AWS resources. It also have rules to detect an event of interest regarding security. A part of rules is based on AWS CIS benchmark. `uguisu` notifies detail to Slack channel when detecting an event of interest like following.
+`uguisu` is AWS CDK Construct to monitor suspicious activity regarding AWS resources. `uguisu` watches CloudTrail logs and monitors changes to AWS resources. It also has rules to detect events of interest regarding security. A large part of rules is based on the AWS CIS benchmark. `uguisu` notifies a Slack channel when detecting an event of interest, like so:
 
 <img width="657" alt="uguisu" src="https://user-images.githubusercontent.com/605953/88273381-147d8880-cd15-11ea-8403-1125f4bed14f.png">
 
 
-By the way, the name of the tool comes from *uguisubari (鶯張り)* that is floors to alarm someone is incoming by a chirping sound when walked upon. In English, it is called *Nightingale floor*. See [wikipedia](https://en.wikipedia.org/wiki/Nightingale_floor) for more detail.
+The name of the tool comes from *uguisubari (鶯張り)* - floors used to alert that someone is incoming by a making a chirping sound when walked upon. In English, it is called *Nightingale floor*. See [wikipedia](https://en.wikipedia.org/wiki/Nightingale_floor) for more detail.
 
 # Rules
 

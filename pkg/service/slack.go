@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
 	"github.com/m-mizutani/golambda"
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/slack-go/slack"
 )
 
@@ -135,9 +135,9 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	if err != nil {
 		return golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
 	}
+	defer resp.Body.Close() //nolint:errcheck
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(raw))
+		body, _ := io.ReadAll(resp.Body)
 		return golambda.NewError("Failed to post message to slack in API").
 			With("msg", msg).
 			With("code", resp.StatusCode).

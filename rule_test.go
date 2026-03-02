@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/uuid"
 	"github.com/m-mizutani/golambda"
-	"github.com/m-mizutani/uguisu/pkg/mock"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/mock"
+	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +24,7 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 
 	s3Region := "us-east-0"
 	s3Bucket := "your-ct-logs"
-	s3Key := "some/object/" + uuid.New().String()
+	s3Key := "some/object/" + uuid.New().String() + ".json.gz"
 
 	eventIDs := make([]string, len(records))
 	for i := range records {
