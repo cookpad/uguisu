@@ -8,8 +8,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 	"github.com/m-mizutani/golambda"
 	"github.com/m-mizutani/uguisu/pkg/mock"
@@ -35,7 +37,7 @@ func putData(client *mock.S3Client, region, bucket, key string, records []*model
 	}
 	gz.Close()
 
-	_, err = client.PutObject(&s3.PutObjectInput{
+	_, err = client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(buf.Bytes()),
