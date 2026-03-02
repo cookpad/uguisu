@@ -9,7 +9,7 @@
   "homepage": "https://github.com/cookpad/uguisu",
   "scripts": {
     "prepare": "tsc",
-    "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true}); console.log('Removed nested vulnerable package:',p)}catch(e){}})\"",
+    "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true})}catch(e){}})\"",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "tsc; jest",
