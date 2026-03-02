@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"os"
@@ -131,15 +130,14 @@ func TestSlackNotify_TruncatesLongRequestParameters(t *testing.T) {
 	}
 	require.NoError(t, svc.Notify(alert))
 
-	// The raw JSON payload must exist and the param block must be <= 1000 chars
 	body := httpClient.Body(0)
 	assert.Contains(t, body, "RequestParameters")
 
-	// Unmarshal and find the param block to verify truncation
-	var msg map[string]interface{}
-	require.NoError(t, json.Unmarshal([]byte(body), &msg))
-	raw, _ := json.Marshal(msg)
-	assert.Less(t, len(raw), 5000, "payload should not contain the full 2000-char value untruncated")
+	// The truncation limit is 1000 chars total for the param block.
+	// Without truncation the payload would contain ~2000 consecutive x's.
+	// With truncation it will contain fewer than 1001 consecutive x's.
+	assert.NotContains(t, body, strings.Repeat("x", 1001), "RequestParameters value should be truncated to 1000 chars")
+	assert.Contains(t, body, strings.Repeat("x", 100), "RequestParameters value should not be empty after truncation")
 }
 
 func TestSlackNotify_ErrorOnNilHTTPClient(t *testing.T) {
