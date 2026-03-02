@@ -1,6 +1,6 @@
 module github.com/cookpad/uguisu
 
-go 1.25.0
+go 1.25
 
 require (
 	github.com/Netflix/go-env v0.0.0-20201103003909-014a952cefe2
