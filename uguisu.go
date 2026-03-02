@@ -162,7 +162,9 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 	if err != nil {
 		panic(err)
 	}
-	gz.Close()
+	if err = gz.Close(); err != nil {
+		panic(err)
+	}
 
 	_, err = s3Client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),

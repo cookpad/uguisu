@@ -135,7 +135,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	if err != nil {
 		return golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return golambda.NewError("Failed to post message to slack in API").

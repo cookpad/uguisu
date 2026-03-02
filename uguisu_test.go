@@ -35,7 +35,9 @@ func putData(client *mock.S3Client, region, bucket, key string, records []*model
 	if _, err := gz.Write(raw); err != nil {
 		panic(err)
 	}
-	gz.Close()
+	if err := gz.Close(); err != nil {
+		panic(err)
+	}
 
 	_, err = client.PutObject(context.Background(), &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
