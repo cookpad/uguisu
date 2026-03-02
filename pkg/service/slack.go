@@ -143,6 +143,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 			With("code", resp.StatusCode).
 			With("body", string(body))
 	}
+	defer resp.Body.Close()
 
 	return nil
 }

@@ -1,7 +1,7 @@
 {
   "name": "uguisu",
   "version": "2.0.0",
-  "description§": "AWS CDK construct to monitor security related event of CloudTrail logs based on AWS CIS benchmark",
+  "description": "AWS CDK construct to monitor security related event of CloudTrail logs based on AWS CIS benchmark",
   "repository": {
     "type": "git",
     "url": "https://github.com/cookpad/uguisu.git"
@@ -52,7 +52,7 @@
   "targets": {
     "cdk-lambda": {
       "context": "node",
-"sourceMap": false,
+      "sourceMap": false,
       "minify": false,
       "engines": {
         "node": ">= 12"

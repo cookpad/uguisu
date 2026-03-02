@@ -31,7 +31,7 @@ func (x *HTTPClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func (x *HTTPClient) Body(n int) string {
-	if len(x.Requests) < n {
+	if n >= len(x.Requests) {
 		panic("n is too large")
 	}
 

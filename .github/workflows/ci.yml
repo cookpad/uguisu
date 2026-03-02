@@ -5,7 +5,7 @@ on:
     branches: ["**"]
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -20,9 +20,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
       - name: Run golangci-lint
         run: golangci-lint run
