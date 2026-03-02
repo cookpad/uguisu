@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"io/ioutil"
+	"io"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -64,7 +64,7 @@ func (x *S3Client) PutObject(ctx context.Context, input *s3.PutObjectInput, optF
 		s3Objects[*input.Bucket] = memBucket
 	}
 
-	data, err := ioutil.ReadAll(input.Body)
+	data, err := io.ReadAll(input.Body)
 	if err != nil {
 		return &s3.PutObjectOutput{}, err
 	}

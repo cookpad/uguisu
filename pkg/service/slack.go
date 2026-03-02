@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -136,7 +136,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		return golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
 	}
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		fmt.Println(string(raw))
 		return golambda.NewError("Failed to post message to slack in API").
 			With("msg", msg).
