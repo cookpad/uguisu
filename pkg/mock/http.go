@@ -39,7 +39,7 @@ func (x *HTTPClient) Body(n int) string {
 	if err != nil {
 		panic(err)
 	}
-	defer body.Close()
+	defer body.Close() //nolint:errcheck
 	raw, err := io.ReadAll(body)
 	if err != nil {
 		panic(err)
