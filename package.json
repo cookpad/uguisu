@@ -16,7 +16,7 @@
     "cdk": "cdk"
   },
   "main": "./lib/uguisu-stack.js",
-  "type": "./lib/uguisu-stack.d.ts",
+  "types": "./lib/uguisu-stack.d.ts",
   "files": [
     "lib"
   ],
