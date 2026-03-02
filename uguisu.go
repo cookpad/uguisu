@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -195,7 +195,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 
 	var detected []*models.CloudTrailRecord
 	for _, req := range httpClient.Requests {
-		data, err := ioutil.ReadAll(req.Body)
+		data, err := io.ReadAll(req.Body)
 		if err != nil {
 			panic(err)
 		}

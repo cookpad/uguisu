@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -84,7 +84,7 @@ func TestUguisuBasic(t *testing.T) {
 	assert.Equal(t, "test.example.com", httpClient.Requests[0].URL.Host)
 	assert.Equal(t, "/endpoint", httpClient.Requests[0].URL.Path)
 
-	sentData, err := ioutil.ReadAll(httpClient.Requests[0].Body)
+	sentData, err := io.ReadAll(httpClient.Requests[0].Body)
 	require.NoError(t, err)
 	assert.Contains(t, string(sentData), "AWS CIS benchmark 3.1 ")
 }
