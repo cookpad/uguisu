@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/m-mizutani/golambda"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 // Filter is interface to modify or drop detected alert before notifying

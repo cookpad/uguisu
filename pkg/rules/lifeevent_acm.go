@@ -1,7 +1,7 @@
 package rules
 
 import (
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 type lifeEventACM struct {

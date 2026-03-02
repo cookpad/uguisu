@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/m-mizutani/golambda"
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/slack-go/slack"
 )
 

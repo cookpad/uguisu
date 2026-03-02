@@ -1,7 +1,7 @@
 package rules
 
 import (
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 // https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.8-remediation

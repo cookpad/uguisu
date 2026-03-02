@@ -1,6 +1,6 @@
 package main
 
-import "github.com/m-mizutani/uguisu"
+import "github.com/cookpad/uguisu"
 
 func main() {
 	uguisu.New().Start()

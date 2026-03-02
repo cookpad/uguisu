@@ -1,6 +1,6 @@
 package rules
 
-import "github.com/m-mizutani/uguisu/pkg/models"
+import "github.com/cookpad/uguisu/pkg/models"
 
 // NewDefaultRuleSet returns default rule set of
 func NewDefaultRuleSet() *models.RuleSet {

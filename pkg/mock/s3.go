@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/adaptor"
 )
 
 var s3Objects map[string]map[string][]byte

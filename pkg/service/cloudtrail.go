@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/m-mizutani/golambda"
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 type CloudTrailLogs struct {

@@ -1,4 +1,4 @@
-module github.com/m-mizutani/uguisu
+module github.com/cookpad/uguisu
 
 go 1.25.0
 

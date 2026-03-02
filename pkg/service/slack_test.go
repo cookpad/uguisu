@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/m-mizutani/uguisu/pkg/models"
-	"github.com/m-mizutani/uguisu/pkg/service"
+	"github.com/cookpad/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/service"
 	"github.com/stretchr/testify/require"
 )
 

@@ -18,11 +18,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/m-mizutani/golambda"
 
-	"github.com/m-mizutani/uguisu/pkg/adaptor"
-	"github.com/m-mizutani/uguisu/pkg/mock"
-	"github.com/m-mizutani/uguisu/pkg/models"
-	"github.com/m-mizutani/uguisu/pkg/rules"
-	"github.com/m-mizutani/uguisu/pkg/service"
+	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/mock"
+	"github.com/cookpad/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/rules"
+	"github.com/cookpad/uguisu/pkg/service"
 )
 
 var logger = golambda.Logger

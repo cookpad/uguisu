@@ -3,7 +3,7 @@ package rules
 import (
 	"regexp"
 
-	"github.com/m-mizutani/uguisu/pkg/models"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 // CIS 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls
