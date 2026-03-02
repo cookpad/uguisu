@@ -9,6 +9,7 @@
   "homepage": "https://github.com/m-mizutani/uguisu",
   "scripts": {
     "prepare": "tsc",
+    "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true}); console.log('Removed nested vulnerable package:',p)}catch(e){}})\"",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "tsc; jest",
@@ -21,7 +22,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@aws-cdk/assert": "1.75.0",
+    "@aws-cdk/assert": "1.204.0",
     "@types/jest": "^26.0.0",
     "@types/node": "^16.18.0",
     "jest": "^26.6.3",
@@ -31,16 +32,22 @@
     "typescript": "~4.9.5"
   },
   "dependencies": {
-    "@aws-cdk/aws-iam": "1.75.0",
-    "@aws-cdk/aws-lambda-event-sources": "1.75.0",
-    "@aws-cdk/aws-lambda-nodejs": "1.75.0",
-    "@aws-cdk/aws-sns": "1.75.0",
-    "@aws-cdk/aws-sns-subscriptions": "1.75.0",
-    "@aws-cdk/aws-sqs": "1.75.0",
-    "@aws-cdk/core": "1.75.0",
+    "@aws-cdk/aws-iam": "1.204.0",
+    "@aws-cdk/aws-lambda-event-sources": "1.204.0",
+    "@aws-cdk/aws-lambda-nodejs": "1.204.0",
+    "@aws-cdk/aws-sns": "1.204.0",
+    "@aws-cdk/aws-sns-subscriptions": "1.204.0",
+    "@aws-cdk/aws-sqs": "1.204.0",
+    "@aws-cdk/core": "1.204.0",
     "@types/aws-lambda": "^8.10.57",
     "aws-sdk": "^2.1693.0",
     "source-map-support": "^0.5.16"
+  },
+  "overrides": {
+    "minimatch": "3.1.5",
+    "semver": "7.7.4",
+    "braces": "3.0.3",
+    "micromatch": "4.0.8"
   },
   "cdk-lambda": "/asset-output/index.js",
   "targets": {
