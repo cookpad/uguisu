@@ -12,6 +12,7 @@
     "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true})}catch(e){}})\"",
     "build": "tsc",
     "watch": "tsc -w",
+    "lint": "eslint",
     "test": "tsc; jest",
     "cdk": "cdk"
   },
@@ -25,9 +26,12 @@
     "@aws-cdk/assert": "1.204.0",
     "@types/jest": "^26.0.0",
     "@types/node": "^16.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "aws-cdk": "1.204.0",
+    "eslint": "^10.0.2",
     "jest": "^26.6.3",
     "ts-jest": "^26.5.6",
-    "aws-cdk": "1.204.0",
     "ts-node": "^8.1.0",
     "typescript": "~4.9.5"
   },
