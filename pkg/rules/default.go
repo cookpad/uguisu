@@ -26,6 +26,8 @@ func NewDefaultRuleSet() *models.RuleSet {
 			newLifeEventACM(),
 			newLifeEventEC2(),
 			newLifeEventRDS(),
+			newLifeEventVPC(),
+			newLifeEventOrg(),
 		},
 	}
 }
