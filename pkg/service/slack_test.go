@@ -1,44 +1,183 @@
 package service_test
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/cookpad/uguisu/pkg/service"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestSlackIntegrtion(t *testing.T) {
+func baseAlert() *models.Alert {
+	return &models.Alert{
+		Title:       "Test alert",
+		RuleID:      "test_rule_id",
+		Sev:         models.SeverityMedium,
+		Description: "test description",
+		Events: []*models.CloudTrailRecord{
+			{
+				EventTime:          "2020-01-02T15:04:05",
+				EventName:          "TestEvent",
+				SourceIPAddress:    "10.1.2.3",
+				UserAgent:          "my-user-agent",
+				RecipientAccountID: "123456789012",
+				AwsRegion:          "ap-northeast-1",
+				UserIdentity: models.CloudTrailUserIdentity{
+					ARN: "arn:aws:sts::123456789012:assumed-role/TestRole/session",
+				},
+			},
+		},
+	}
+}
+
+func TestSlackNotify_PostsToWebhook(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	require.NoError(t, svc.Notify(baseAlert()))
+	require.Equal(t, 1, httpClient.RequestNum())
+
+	req := httpClient.Requests[0]
+	assert.Equal(t, "POST", req.Method)
+	assert.Equal(t, "https://hooks.example.com/webhook", req.URL.String())
+}
+
+func TestSlackNotify_PayloadContainsAlertFields(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	require.NoError(t, svc.Notify(baseAlert()))
+
+	body := httpClient.Body(0)
+	assert.Contains(t, body, "Test alert")
+	assert.Contains(t, body, "test_rule_id")
+	assert.Contains(t, body, "test description")
+	assert.Contains(t, body, "TestEvent")
+	assert.Contains(t, body, "10.1.2.3")
+}
+
+func TestSlackNotify_SeverityColors(t *testing.T) {
+	cases := []struct {
+		sev   models.Severity
+		color string
+	}{
+		{models.SeverityHigh, "#A30200"},
+		{models.SeverityMedium, "#F2C744"},
+		{models.SeverityLow, "#2EB886"},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(string(tc.sev), func(t *testing.T) {
+			httpClient := &mock.HTTPClient{}
+			svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+			alert := baseAlert()
+			alert.Sev = tc.sev
+			require.NoError(t, svc.Notify(alert))
+			assert.Contains(t, httpClient.Body(0), tc.color)
+		})
+	}
+}
+
+func TestSlackNotify_IncludesErrorCode(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	alert := baseAlert()
+	alert.Events[0].ErrorCode = aws.String("UnauthorizedOperation")
+	require.NoError(t, svc.Notify(alert))
+
+	assert.Contains(t, httpClient.Body(0), "UnauthorizedOperation")
+}
+
+func TestSlackNotify_IncludesErrorMessage(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	alert := baseAlert()
+	alert.Events[0].ErrorMessage = aws.String("Failed authentication")
+	require.NoError(t, svc.Notify(alert))
+
+	assert.Contains(t, httpClient.Body(0), "Failed authentication")
+}
+
+func TestSlackNotify_IncludesRequestParameters(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	alert := baseAlert()
+	alert.Events[0].RequestParameters = map[string]interface{}{"bucketName": "my-bucket"}
+	require.NoError(t, svc.Notify(alert))
+
+	assert.Contains(t, httpClient.Body(0), "bucketName")
+	assert.Contains(t, httpClient.Body(0), "my-bucket")
+}
+
+func TestSlackNotify_TruncatesLongRequestParameters(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+
+	alert := baseAlert()
+	alert.Events[0].RequestParameters = map[string]interface{}{
+		"key": strings.Repeat("x", 2000),
+	}
+	require.NoError(t, svc.Notify(alert))
+
+	// The raw JSON payload must exist and the param block must be <= 1000 chars
+	body := httpClient.Body(0)
+	assert.Contains(t, body, "RequestParameters")
+
+	// Unmarshal and find the param block to verify truncation
+	var msg map[string]interface{}
+	require.NoError(t, json.Unmarshal([]byte(body), &msg))
+	raw, _ := json.Marshal(msg)
+	assert.Less(t, len(raw), 5000, "payload should not contain the full 2000-char value untruncated")
+}
+
+func TestSlackNotify_ErrorOnNilHTTPClient(t *testing.T) {
+	svc := service.NewSlack(nil, "https://hooks.example.com/webhook")
+	err := svc.Notify(baseAlert())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "HTTPClient is required")
+}
+
+func TestSlackNotify_ErrorOnEmptyWebhookURL(t *testing.T) {
+	svc := service.NewSlack(&mock.HTTPClient{}, "")
+	err := svc.Notify(baseAlert())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "webhookURL is required")
+}
+
+func TestSlackNotify_ErrorOnNon200Response(t *testing.T) {
+	httpClient := &mock.HTTPClient{
+		RespCode: http.StatusInternalServerError,
+		RespBody: io.NopCloser(strings.NewReader("internal error")),
+	}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+	err := svc.Notify(baseAlert())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to post message to slack in API")
+}
+
+// TestSlackIntegration sends a real Slack notification when TEST_SLACK_URL is set.
+func TestSlackIntegration(t *testing.T) {
 	url, ok := os.LookupEnv("TEST_SLACK_URL")
 	if !ok {
 		t.Skip("TEST_SLACK_URL is not set")
 	}
 
-	slack := service.NewSlack(&http.Client{}, url)
-	require.NoError(t, slack.Notify(&models.Alert{
-		Title:       "Test alert",
-		RuleID:      "test_rule_id",
-		Sev:         models.SeverityMedium,
-		Description: "this is test. please ignore me",
-		Events: []*models.CloudTrailRecord{
-			{
-				EventTime:          "2020-01-02T15:04:05",
-				SourceIPAddress:    "10.1.2.3",
-				EventName:          "TestEvent",
-				UserAgent:          "my-user-agent",
-				ErrorCode:          aws.String("some-error"),
-				RecipientAccountID: "1111111111111",
-				AwsRegion:          "ap-northeast-1",
-				RequestParameters: map[string]interface{}{
-					"test": "message",
-				},
-				UserIdentity: models.CloudTrailUserIdentity{
-					ARN: `arn:aws:sts::11111111111111:assumed-role/TestRole/xxxxxxxxxxxxx`,
-				},
-			},
-		},
-	}))
+	svc := service.NewSlack(&http.Client{}, url)
+	alert := baseAlert()
+	alert.Title = "Integration test alert"
+	alert.Events[0].ErrorCode = aws.String("some-error")
+	alert.Events[0].RequestParameters = map[string]interface{}{"test": "message"}
+	require.NoError(t, svc.Notify(alert))
 }

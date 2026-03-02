@@ -8,11 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// helper to build a base record with sensible defaults
-func rec() *models.CloudTrailRecord {
-	return &models.CloudTrailRecord{}
-}
-
 func strp(s string) *string { return aws.String(s) }
 
 // ── CIS 3.2 ──────────────────────────────────────────────────────────────────
