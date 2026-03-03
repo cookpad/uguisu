@@ -1,6 +1,6 @@
 {
   "name": "uguisu",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "AWS CDK construct to monitor security related event of CloudTrail logs based on AWS CIS benchmark",
   "repository": {
     "type": "git",
@@ -9,10 +9,9 @@
   "homepage": "https://github.com/cookpad/uguisu",
   "scripts": {
     "prepare": "tsc",
-    "postinstall": "node -e \"const fs=require('fs'); ['@aws-cdk/core/node_modules/minimatch','@aws-cdk/cx-api/node_modules/semver','@aws-cdk/cloud-assembly-schema/node_modules/semver'].forEach(p=>{const full='node_modules/'+p; try{fs.rmSync(full,{recursive:true,force:true})}catch(e){}})\"",
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "eslint . --ext .ts,.js --max-warnings=0",
+    "lint": "eslint . --max-warnings=0",
     "test": "tsc; jest",
     "cdk": "cdk"
   },
@@ -22,28 +21,25 @@
     "lib"
   ],
   "license": "MIT",
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.105.0",
+    "constructs": "^10.0.0"
+  },
   "devDependencies": {
-    "@aws-cdk/assert": "1.204.0",
-    "@types/jest": "^26.0.0",
+    "@types/jest": "^29.0.0",
     "@types/node": "^16.18.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "aws-cdk": "1.204.0",
+    "aws-cdk": "2.1108.0",
+    "aws-cdk-lib": "2.241.0",
+    "constructs": "10.5.1",
     "eslint": "^10.0.2",
-    "jest": "^26.6.3",
-    "ts-jest": "^26.5.6",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^8.1.0",
-    "typescript": "~4.9.5"
+    "typescript": "~5.5.4"
   },
   "dependencies": {
-    "@aws-cdk/aws-iam": "1.204.0",
-    "@aws-cdk/aws-lambda": "1.204.0",
-    "@aws-cdk/aws-lambda-event-sources": "1.204.0",
-    "@aws-cdk/aws-s3": "1.204.0",
-    "@aws-cdk/aws-sns": "1.204.0",
-    "@aws-cdk/aws-sns-subscriptions": "1.204.0",
-    "@aws-cdk/aws-sqs": "1.204.0",
-    "@aws-cdk/core": "1.204.0",
     "@types/aws-lambda": "^8.10.57",
     "source-map-support": "^0.5.16"
   },
