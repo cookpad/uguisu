@@ -47,8 +47,8 @@ test("creates Lambda with correct runtime, handler, timeout, memory, and concurr
   const stack = makeStack({ s3BucketName: "my-bucket" });
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::Lambda::Function", {
-    Runtime: "go1.x",
-    Handler: "tracker",
+    Runtime: "provided.al2023",
+    Handler: "bootstrap",
     Timeout: 300,
     MemorySize: 1024,
     ReservedConcurrentExecutions: 5,
