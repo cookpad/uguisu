@@ -1,11 +1,12 @@
-import * as cdk from "@aws-cdk/core";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as sns from "@aws-cdk/aws-sns";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as iam from "@aws-cdk/aws-iam";
-import * as s3 from "@aws-cdk/aws-s3";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
-import { SqsSubscription } from "@aws-cdk/aws-sns-subscriptions";
+import * as cdk from "aws-cdk-lib";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { SqsSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
+import { Construct } from "constructs";
 
 export interface Arguments {
   lambdaBuildPath: string;
@@ -24,7 +25,7 @@ export class UguisuStack extends cdk.Stack {
   tracker: lambda.Function;
 
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     args: Arguments,
     props?: cdk.StackProps
@@ -53,7 +54,7 @@ export class UguisuStack extends cdk.Stack {
     // const buildPath = path.resolve(__dirname, '../build');
     const assertPath = lambda.Code.fromAsset(args.lambdaBuildPath, {
       bundling: {
-        image: lambda.Runtime.GO_1_X.bundlingDockerImage,
+        image: lambda.Runtime.GO_1_X.bundlingImage,
         user: 'root',
         // command: ['find'],
 
