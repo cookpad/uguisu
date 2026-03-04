@@ -95,6 +95,32 @@ test("sets SENTRY_DSN when provided", () => {
   );
 });
 
+test("sets DISABLED_RULES to empty string when not provided", () => {
+  const stack = makeStack({ s3BucketName: "my-bucket" });
+  cdkExpect(stack).to(
+    haveResourceLike("AWS::Lambda::Function", {
+      Environment: {
+        Variables: {
+          DISABLED_RULES: "",
+        },
+      },
+    })
+  );
+});
+
+test("sets DISABLED_RULES when provided", () => {
+  const stack = makeStack({ s3BucketName: "my-bucket", disabledRules: "resource_lifeevent_ec2" });
+  cdkExpect(stack).to(
+    haveResourceLike("AWS::Lambda::Function", {
+      Environment: {
+        Variables: {
+          DISABLED_RULES: "resource_lifeevent_ec2",
+        },
+      },
+    })
+  );
+});
+
 test("uses provided IAM role ARN when lambdaRoleARN is given", () => {
   const stack = makeStack({ lambdaRoleARN: "arn:aws:iam::123456789012:role/my-role" });
   cdkExpect(stack).to(
