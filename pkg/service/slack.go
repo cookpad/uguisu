@@ -133,48 +133,60 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		return golambda.WrapError(err, "Failed to unmarshal slack message").With("msg", msg)
 	}
 
-	for attempt := 0; attempt <= maxRetries; attempt++ {
+	// doAttempt performs a single POST.
+	// Returns (rateLimited=true, wait, nil) on 429.
+	// Returns (false, 0, nil) on success.
+	// Returns (false, 0, err) on any other failure.
+	doAttempt := func() (bool, time.Duration, error) {
 		req, err := http.NewRequest("POST", x.webhookURL, bytes.NewBuffer(raw))
 		if err != nil {
-			return golambda.WrapError(err, "Failed to create a new HTTP request to Slack")
+			return false, 0, golambda.WrapError(err, "Failed to create a new HTTP request to Slack")
 		}
 
 		resp, err := x.httpClient.Do(req)
 		if err != nil {
-			return golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
+			return false, 0, golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
 		}
 		defer resp.Body.Close() //nolint:errcheck
 
 		if resp.StatusCode == http.StatusTooManyRequests {
-			if attempt == maxRetries {
-				retryAfter := resp.Header.Get("Retry-After")
-				return golambda.NewError("Rate limited by Slack API, max retries exceeded").
-					With("code", resp.StatusCode).
-					With("retry_after", retryAfter).
-					With("attempts", attempt+1)
-			}
-
 			wait := defaultRetryAfter
 			if retryAfter := resp.Header.Get("Retry-After"); retryAfter != "" {
-				if secs, err := strconv.Atoi(retryAfter); err == nil && secs > 0 {
+				if secs, err := strconv.Atoi(retryAfter); err == nil && secs >= 0 {
 					wait = time.Duration(secs) * time.Second
 				}
 			}
-			golambda.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
-			time.Sleep(wait)
-			continue
+			return true, wait, nil
 		}
 
 		if resp.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(resp.Body)
-			return golambda.NewError("Failed to post message to slack in API").
+			return false, 0, golambda.NewError("Failed to post message to slack in API").
 				With("msg", msg).
 				With("code", resp.StatusCode).
 				With("body", string(body))
 		}
 
-		return nil
+		return false, 0, nil
 	}
 
-	return golambda.NewError("Failed to post message to Slack after retries").With("attempts", maxRetries+1)
+	var lastWait time.Duration
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		rateLimited, wait, err := doAttempt()
+		if err != nil {
+			return err
+		}
+		if !rateLimited {
+			return nil
+		}
+		lastWait = wait
+		if attempt < maxRetries {
+			golambda.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
+			time.Sleep(wait)
+		}
+	}
+
+	return golambda.NewError("Rate limited by Slack API, max retries exceeded").
+		With("retry_after", lastWait.String()).
+		With("attempts", maxRetries+1)
 }

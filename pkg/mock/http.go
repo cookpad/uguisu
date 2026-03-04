@@ -1,15 +1,18 @@
 package mock
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"strings"
 )
 
 // Response holds the data for a single canned HTTP response.
+// Body is stored as []byte so a fresh io.ReadCloser can be created for each
+// request, preventing issues when a response is repeated or reused.
 type Response struct {
 	Code    int
-	Body    io.ReadCloser
+	Body    []byte
 	Headers http.Header
 }
 
@@ -33,16 +36,21 @@ func (x *HTTPClient) Do(req *http.Request) (*http.Response, error) {
 			idx = len(x.Responses) - 1
 		}
 		r := x.Responses[idx]
-		body := r.Body
-		if body == nil {
-			body = io.NopCloser(strings.NewReader("OK"))
+		code := r.Code
+		if code == 0 {
+			code = 200
 		}
+		bodyBytes := r.Body
+		if bodyBytes == nil {
+			bodyBytes = []byte("OK")
+		}
+		body := io.NopCloser(bytes.NewReader(bodyBytes))
 		headers := r.Headers
 		if headers == nil {
 			headers = http.Header{}
 		}
 		return &http.Response{
-			StatusCode: r.Code,
+			StatusCode: code,
 			Body:       body,
 			Header:     headers,
 		}, nil
