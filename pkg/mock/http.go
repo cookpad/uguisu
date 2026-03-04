@@ -1,19 +1,60 @@
 package mock
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"strings"
 )
 
+// Response holds the data for a single canned HTTP response.
+// Body is stored as []byte so a fresh io.ReadCloser can be created for each
+// request, preventing issues when a response is repeated or reused.
+type Response struct {
+	Code    int
+	Body    []byte
+	Headers http.Header
+}
+
+// HTTPClient is a mock HTTP client for testing.
+// If Responses is non-empty, each call to Do consumes the next entry (the last
+// entry is repeated once exhausted).  Otherwise RespCode/RespBody are used for
+// every call, preserving backwards compatibility.
 type HTTPClient struct {
-	Requests []*http.Request
-	RespCode int
-	RespBody io.ReadCloser
+	Requests  []*http.Request
+	RespCode  int
+	RespBody  io.ReadCloser
+	Responses []Response
 }
 
 func (x *HTTPClient) Do(req *http.Request) (*http.Response, error) {
 	x.Requests = append(x.Requests, req)
+
+	if len(x.Responses) > 0 {
+		idx := len(x.Requests) - 1
+		if idx >= len(x.Responses) {
+			idx = len(x.Responses) - 1
+		}
+		r := x.Responses[idx]
+		code := r.Code
+		if code == 0 {
+			code = 200
+		}
+		bodyBytes := r.Body
+		if bodyBytes == nil {
+			bodyBytes = []byte("OK")
+		}
+		body := io.NopCloser(bytes.NewReader(bodyBytes))
+		headers := r.Headers
+		if headers == nil {
+			headers = http.Header{}
+		}
+		return &http.Response{
+			StatusCode: code,
+			Body:       body,
+			Header:     headers,
+		}, nil
+	}
 
 	code := x.RespCode
 	if code == 0 {

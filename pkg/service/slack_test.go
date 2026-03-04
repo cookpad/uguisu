@@ -165,6 +165,35 @@ func TestSlackNotify_ErrorOnNon200Response(t *testing.T) {
 	assert.Contains(t, err.Error(), "Failed to post message to slack in API")
 }
 
+func TestSlackNotify_RetriesOn429ThenSucceeds(t *testing.T) {
+	// Two 429s followed by a 200 — should succeed and make 3 requests total.
+	httpClient := &mock.HTTPClient{
+		Responses: []mock.Response{
+			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"0"}}},
+			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"0"}}},
+			{Code: http.StatusOK},
+		},
+	}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+	err := svc.Notify(baseAlert())
+	require.NoError(t, err)
+	assert.Equal(t, 3, httpClient.RequestNum())
+}
+
+func TestSlackNotify_ErrorAfterMaxRetries429(t *testing.T) {
+	// All responses are 429 — should exhaust retries and return an error.
+	httpClient := &mock.HTTPClient{
+		Responses: []mock.Response{
+			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"0"}}},
+		},
+	}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+	err := svc.Notify(baseAlert())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "max retries exceeded")
+	assert.Equal(t, 4, httpClient.RequestNum()) // 1 initial + 3 retries
+}
+
 // TestSlackIntegration sends a real Slack notification when TEST_SLACK_URL is set.
 func TestSlackIntegration(t *testing.T) {
 	url, ok := os.LookupEnv("TEST_SLACK_URL")
