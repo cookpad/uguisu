@@ -17,6 +17,7 @@ export interface Arguments {
 
   slackWebhookURL: string;
   sentryDSN?: string;
+  disabledRules?: string;
 }
 
 export class UguisuStack extends cdk.Stack {
@@ -76,6 +77,7 @@ export class UguisuStack extends cdk.Stack {
       environment: {
         SLACK_WEBHOOK_URL: args.slackWebhookURL,
         SENTRY_DSN: args.sentryDSN || "",
+        DISABLED_RULES: args.disabledRules || "",
       },
       events: [new SqsEventSource(this.s3EventQueue, { batchSize: 10 })],
       reservedConcurrentExecutions: 5,
