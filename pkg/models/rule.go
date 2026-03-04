@@ -1,6 +1,10 @@
 package models
 
-import "github.com/m-mizutani/golambda"
+import (
+	"strings"
+
+	"github.com/m-mizutani/golambda"
+)
 
 type Rule interface {
 	ID() string
@@ -13,6 +17,25 @@ type Rule interface {
 // RuleSet is collection of Rule and has Detect method for bulk evaluation
 type RuleSet struct {
 	Rules []Rule
+}
+
+// Disable removes rules whose ID appears in the comma-separated disabledIDs
+// string (e.g. the DISABLED_RULES environment variable).
+func (x *RuleSet) Disable(disabledIDs string) {
+	if disabledIDs == "" {
+		return
+	}
+	disabled := make(map[string]bool)
+	for _, id := range strings.Split(disabledIDs, ",") {
+		disabled[strings.TrimSpace(id)] = true
+	}
+	filtered := x.Rules[:0]
+	for _, rule := range x.Rules {
+		if !disabled[rule.ID()] {
+			filtered = append(filtered, rule)
+		}
+	}
+	x.Rules = filtered
 }
 
 // Detect is bulk evaluation method of rules in the RuleSet. It returns set of Alert that is matched with a rule. It returns nil (0 length array) if no rule is matched

@@ -35,6 +35,7 @@ type Uguisu struct {
 	Rules           *models.RuleSet
 	Filters         AlertFilters
 	SlackWebhookURL string `env:"SLACK_WEBHOOK_URL"`
+	DisabledRules   string `env:"DISABLED_RULES"`
 }
 
 // New is constructor of Uguisu
@@ -48,6 +49,8 @@ func New() *Uguisu {
 	if _, err := env.UnmarshalFromEnviron(u); err != nil {
 		panic(err)
 	}
+
+	u.Rules.Disable(u.DisabledRules)
 
 	return u
 }
