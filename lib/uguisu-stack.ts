@@ -22,6 +22,7 @@ export interface Arguments {
 
 export class UguisuStack extends cdk.Stack {
   s3EventQueue: sqs.Queue;
+  s3EventDLQ: sqs.Queue;
   tracker: lambda.Function;
 
   constructor(
@@ -38,8 +39,16 @@ export class UguisuStack extends cdk.Stack {
       );
     }
 
+    this.s3EventDLQ = new sqs.Queue(this, "s3EventDLQ", {
+      retentionPeriod: cdk.Duration.days(14),
+    });
+
     this.s3EventQueue = new sqs.Queue(this, "s3EventQueue", {
       visibilityTimeout: cdk.Duration.seconds(300),
+      deadLetterQueue: {
+        queue: this.s3EventDLQ,
+        maxReceiveCount: 3,
+      },
     });
 
     const topic = sns.Topic.fromTopicArn(this, "s3Event", args.snsTopicARN);

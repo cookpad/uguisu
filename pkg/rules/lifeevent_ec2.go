@@ -18,7 +18,7 @@ func newLifeEventEC2() models.Rule {
 }
 
 func (x *lifeEventEC2) ID() string                { return "resource_lifeevent_ec2" }
-func (x *lifeEventEC2) Title() string             { return "EC2 Instance Life Event" }
+func (x *lifeEventEC2) Title() string             { return "EC2 Instance Life Event - Test!" }
 func (x *lifeEventEC2) Severity() models.Severity { return models.SeverityLow }
 func (x *lifeEventEC2) Description() string {
 	return "Monitoring events of EC2 instance creation and destruction"
