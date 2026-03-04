@@ -416,6 +416,14 @@ func TestLifeEventEC2(t *testing.T) {
 		}))
 	})
 
+	t.Run("no detection when source IP is ecs-compute", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource:     "ec2.amazonaws.com",
+			EventName:       "TerminateInstances",
+			SourceIPAddress: "ecs-compute.amazonaws.com",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
 		assert.False(t, rule.Match(&models.CloudTrailRecord{
 			EventSource: "ec2.amazonaws.com",
