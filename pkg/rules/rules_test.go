@@ -424,6 +424,22 @@ func TestLifeEventEC2(t *testing.T) {
 		}))
 	})
 
+	t.Run("no detection for dry run operation", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "RunInstances",
+			ErrorCode:   strp("Client.DryRunOperation"),
+		}))
+	})
+
+	t.Run("detects RunInstances when ErrorCode is set but not dry run", func(t *testing.T) {
+		assert.True(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "RunInstances",
+			ErrorCode:   strp("Client.UnauthorizedOperation"),
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
 		assert.False(t, rule.Match(&models.CloudTrailRecord{
 			EventSource: "ec2.amazonaws.com",
