@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/m-mizutani/golambda"
 	"github.com/cookpad/uguisu/pkg/adaptor"
 	"github.com/cookpad/uguisu/pkg/models"
+	"github.com/m-mizutani/golambda"
 	"github.com/slack-go/slack"
 )
 
@@ -136,6 +136,14 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		return golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
 	}
 	defer resp.Body.Close() //nolint:errcheck
+
+	if resp.StatusCode == http.StatusTooManyRequests {
+		retryAfter := resp.Header.Get("Retry-After")
+		return golambda.NewError("Rate limited by Slack API").
+			With("code", resp.StatusCode).
+			With("retry_after", retryAfter)
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return golambda.NewError("Failed to post message to slack in API").

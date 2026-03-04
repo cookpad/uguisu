@@ -27,7 +27,8 @@ func (x *lifeEventEC2) Description() string {
 func (x *lifeEventEC2) Match(record *models.CloudTrailRecord) bool {
 	if record.SourceIPAddress == "autoscaling.amazonaws.com" ||
 		record.SourceIPAddress == "batch.amazonaws.com" ||
-		record.SourceIPAddress == "ecs-compute.amazonaws.com" {
+		record.SourceIPAddress == "ecs-compute.amazonaws.com" ||
+		record.SourceIPAddress == "ecs.amazonaws.com" {
 		return false
 	}
 
