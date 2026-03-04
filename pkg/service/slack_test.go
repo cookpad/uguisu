@@ -194,6 +194,21 @@ func TestSlackNotify_ErrorAfterMaxRetries429(t *testing.T) {
 	assert.Equal(t, 4, httpClient.RequestNum()) // 1 initial + 3 retries
 }
 
+func TestSlackNotify_ErrorOnExcessiveRetryAfter(t *testing.T) {
+	// A Retry-After value exceeding the cap should return an error immediately
+	// without sleeping, rather than blocking the Lambda invocation.
+	httpClient := &mock.HTTPClient{
+		Responses: []mock.Response{
+			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"3600"}}},
+		},
+	}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook")
+	err := svc.Notify(baseAlert())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "excessive Retry-After")
+	assert.Equal(t, 1, httpClient.RequestNum()) // gave up after the first 429
+}
+
 // TestSlackIntegration sends a real Slack notification when TEST_SLACK_URL is set.
 func TestSlackIntegration(t *testing.T) {
 	url, ok := os.LookupEnv("TEST_SLACK_URL")

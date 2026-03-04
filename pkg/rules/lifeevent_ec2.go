@@ -32,6 +32,10 @@ func (x *lifeEventEC2) Match(record *models.CloudTrailRecord) bool {
 		return false
 	}
 
+	if record.ErrorCode != nil && *record.ErrorCode == "Client.DryRunOperation" {
+		return false
+	}
+
 	return record.EventSource == "ec2.amazonaws.com" &&
 		x.targetEvents[record.EventName]
 }

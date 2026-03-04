@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	maxRetries         = 3
-	defaultRetryAfter  = 1 * time.Second
+	maxRetries        = 3
+	defaultRetryAfter = 1 * time.Second
+	maxRetryAfter     = 30 * time.Second
 )
 
 type Slack struct {
@@ -180,6 +181,11 @@ func (x *Slack) Notify(alert *models.Alert) error {
 			return nil
 		}
 		lastWait = wait
+		if wait > maxRetryAfter {
+			return golambda.NewError("Rate limited by Slack API with excessive Retry-After, giving up").
+				With("retry_after", wait.String()).
+				With("max_retry_after", maxRetryAfter.String())
+		}
 		if attempt < maxRetries {
 			golambda.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
 			time.Sleep(wait)
