@@ -35,6 +35,23 @@ test("creates SQS queue with 300s visibility timeout", () => {
   );
 });
 
+test("creates DLQ with 14 day retention and wires it to the main queue with maxReceiveCount 3", () => {
+  const stack = makeStack({ s3BucketName: "my-bucket" });
+  cdkExpect(stack).to(
+    haveResource("AWS::SQS::Queue", {
+      MessageRetentionPeriod: 14 * 24 * 60 * 60,
+    })
+  );
+  cdkExpect(stack).to(
+    haveResourceLike("AWS::SQS::Queue", {
+      VisibilityTimeout: 300,
+      RedrivePolicy: objectLike({
+        maxReceiveCount: 3,
+      }),
+    })
+  );
+});
+
 test("subscribes SQS queue to the SNS topic", () => {
   const stack = makeStack({ s3BucketName: "my-bucket" });
   cdkExpect(stack).to(haveResource("AWS::SNS::Subscription", {
