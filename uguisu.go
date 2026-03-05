@@ -9,9 +9,10 @@ import (
 	"net/http"
 	"strings"
 
+	"context"
+
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
-	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -83,7 +84,7 @@ func (x *Uguisu) run(event golambda.Event) error {
 	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
 	for _, event := range messages {
-		logger.With("event", string(event)).Trace("event proessing")
+		logger.With("event", string(event)).Trace("event processing")
 		var s3Event events.S3Event
 		if err := event.Bind(&s3Event); err != nil {
 			return err
