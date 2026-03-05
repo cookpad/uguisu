@@ -49,11 +49,11 @@ The name comes from *uguisubari (鶯張り)* - floors that make a chirping sound
 
 ### CDK tools
 
-See official getting started page. https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html. Please install CDK tools.
+See official getting started page. https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html. Please install CDK tools. Note that currently, CDK v2 is not supported. Please use CDK v1.
 
 ### Slack Incoming Webhook URL
 
-See https://api.slack.com/messaging/webhooks to create your Incoming Webhook URL. You can get URL like this:
+See https://api.slack.com/messaging/webhooks to create your Incoming Webhook URL. You will get a URL like this:
 
 ```
 https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
@@ -61,7 +61,7 @@ https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
 
 ### Setup CloudTrail logging to S3 and SNS topic
 
-Also CloudTrail logs are required to monitor AWS resources. `uguisu` requires not only CloudTrail logs but also SNS topic to notify `s3:ObjectCreated:*` event from S3 bucket.
+CloudTrail logs are required to monitor AWS resources. `uguisu` requires not only CloudTrail logs but also an SNS topic to notify `s3:ObjectCreated:*` event from S3 bucket.
 
 - Enable CloudTrail and logging to S3: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-create-a-trail-using-the-console-first-time.html
 - Change S3 bucket policy: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/create-s3-bucket-policy-for-cloudtrail.html
