@@ -23,7 +23,7 @@ func TestAwsCIS3_1(t *testing.T) {
 		assert.True(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("AccessDenied")}))
 	})
 
-	t.Run("detects AccessDeniedWithCapitalization", func(t *testing.T) {
+	t.Run("detects AccessDeniedException error", func(t *testing.T) {
 		assert.True(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("AccessDeniedException")}))
 	})
 
@@ -397,12 +397,25 @@ func TestLifeEventACM(t *testing.T) {
 	for _, event := range []string{"ExportCertificate", "ImportCertificate", "RenewCertificate", "DeleteCertificate"} {
 		event := event
 		t.Run("detects "+event, func(t *testing.T) {
-			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "acm.amazonaws.com",
+				EventName:   event,
+			}))
 		})
 	}
 
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "DeleteCertificate",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
-		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListCertificates"}))
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "acm.amazonaws.com",
+			EventName:   "ListCertificates",
+		}))
 	})
 }
 
@@ -526,12 +539,25 @@ func TestLifeEventIAM(t *testing.T) {
 	} {
 		event := event
 		t.Run("detects "+event, func(t *testing.T) {
-			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "iam.amazonaws.com",
+				EventName:   event,
+			}))
 		})
 	}
 
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "CreateUser",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
-		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListUsers"}))
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "iam.amazonaws.com",
+			EventName:   "ListUsers",
+		}))
 	})
 }
 
@@ -541,12 +567,25 @@ func TestLifeEventS3(t *testing.T) {
 	for _, event := range []string{"CreateBucket", "DeleteBucket"} {
 		event := event
 		t.Run("detects "+event, func(t *testing.T) {
-			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "s3.amazonaws.com",
+				EventName:   event,
+			}))
 		})
 	}
 
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "CreateBucket",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
-		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListBuckets"}))
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "s3.amazonaws.com",
+			EventName:   "ListBuckets",
+		}))
 	})
 }
 
@@ -584,19 +623,39 @@ func TestLifeEventLambda(t *testing.T) {
 func TestLifeEventSecurityServices(t *testing.T) {
 	rule := newLifeEventSecurityServices()
 
-	for _, event := range []string{
-		"DeleteDetector", "DisassociateFromMasterAccount", "DisassociateFromAdministratorAccount",
-		"DisableSecurityHub", "DeleteInsight",
-		"DeleteAlarms", "DisableAlarmActions",
+	for _, tc := range []struct {
+		source string
+		event  string
+	}{
+		{"guardduty.amazonaws.com", "DeleteDetector"},
+		{"guardduty.amazonaws.com", "DisassociateFromMasterAccount"},
+		{"guardduty.amazonaws.com", "DisassociateFromAdministratorAccount"},
+		{"securityhub.amazonaws.com", "DisableSecurityHub"},
+		{"securityhub.amazonaws.com", "DeleteInsight"},
+		{"monitoring.amazonaws.com", "DeleteAlarms"},
+		{"monitoring.amazonaws.com", "DisableAlarmActions"},
 	} {
-		event := event
-		t.Run("detects "+event, func(t *testing.T) {
-			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+		tc := tc
+		t.Run("detects "+tc.event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: tc.source,
+				EventName:   tc.event,
+			}))
 		})
 	}
 
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "DeleteDetector",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
-		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "DescribeDetector"}))
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "guardduty.amazonaws.com",
+			EventName:   "DescribeDetector",
+		}))
 	})
 }
 
@@ -669,11 +728,24 @@ func TestLifeEventOrg(t *testing.T) {
 	} {
 		event := event
 		t.Run("detects "+event, func(t *testing.T) {
-			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "organizations.amazonaws.com",
+				EventName:   event,
+			}))
 		})
 	}
 
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "CreateAccount",
+		}))
+	})
+
 	t.Run("no detection for unrelated event", func(t *testing.T) {
-		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListAccounts"}))
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "organizations.amazonaws.com",
+			EventName:   "ListAccounts",
+		}))
 	})
 }

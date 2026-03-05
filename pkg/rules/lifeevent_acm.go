@@ -27,5 +27,6 @@ func (x *lifeEventACM) Description() string {
 }
 
 func (x *lifeEventACM) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName]
+	return record.EventSource == "acm.amazonaws.com" &&
+		x.targetEvents[record.EventName]
 }

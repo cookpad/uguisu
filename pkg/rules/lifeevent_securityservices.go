@@ -5,22 +5,25 @@ import (
 )
 
 type lifeEventSecurityServices struct {
-	targetEvents map[string]bool
+	guardDutyEvents   map[string]bool
+	securityHubEvents map[string]bool
+	cloudWatchEvents  map[string]bool
 }
 
 func newLifeEventSecurityServices() models.Rule {
 	return &lifeEventSecurityServices{
-		targetEvents: map[string]bool{
-			// GuardDuty
-			"DeleteDetector":                  true,
-			"DisassociateFromMasterAccount":   true,
+		guardDutyEvents: map[string]bool{
+			"DeleteDetector":                       true,
+			"DisassociateFromMasterAccount":        true,
 			"DisassociateFromAdministratorAccount": true,
-			// Security Hub
-			"DisableSecurityHub":              true,
-			"DeleteInsight":                   true,
-			// CloudWatch alarms
-			"DeleteAlarms":                    true,
-			"DisableAlarmActions":             true,
+		},
+		securityHubEvents: map[string]bool{
+			"DisableSecurityHub": true,
+			"DeleteInsight":      true,
+		},
+		cloudWatchEvents: map[string]bool{
+			"DeleteAlarms":        true,
+			"DisableAlarmActions": true,
 		},
 	}
 }
@@ -33,5 +36,13 @@ func (x *lifeEventSecurityServices) Description() string {
 }
 
 func (x *lifeEventSecurityServices) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName]
+	switch record.EventSource {
+	case "guardduty.amazonaws.com":
+		return x.guardDutyEvents[record.EventName]
+	case "securityhub.amazonaws.com":
+		return x.securityHubEvents[record.EventName]
+	case "monitoring.amazonaws.com":
+		return x.cloudWatchEvents[record.EventName]
+	}
+	return false
 }

@@ -33,5 +33,6 @@ func (x *lifeEventIAM) Description() string {
 }
 
 func (x *lifeEventIAM) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName]
+	return record.EventSource == "iam.amazonaws.com" &&
+		x.targetEvents[record.EventName]
 }
