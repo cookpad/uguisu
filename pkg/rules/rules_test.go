@@ -488,6 +488,92 @@ func TestLifeEventVPC(t *testing.T) {
 	})
 }
 
+func TestLifeEventIAM(t *testing.T) {
+	rule := newLifeEventIAM()
+
+	for _, event := range []string{
+		"CreateUser", "DeleteUser",
+		"CreateRole", "DeleteRole",
+		"CreateAccessKey", "DeleteAccessKey",
+		"CreateLoginProfile", "DeleteLoginProfile",
+		"AddUserToGroup", "RemoveUserFromGroup",
+	} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+		})
+	}
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListUsers"}))
+	})
+}
+
+func TestLifeEventS3(t *testing.T) {
+	rule := newLifeEventS3()
+
+	for _, event := range []string{"CreateBucket", "DeleteBucket"} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+		})
+	}
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "ListBuckets"}))
+	})
+}
+
+func TestLifeEventLambda(t *testing.T) {
+	rule := newLifeEventLambda()
+
+	for _, event := range []string{
+		"CreateFunction20150331", "DeleteFunction20150331",
+		"UpdateFunctionCode20150331v2", "AddPermission20150331v2",
+	} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "lambda.amazonaws.com",
+				EventName:   event,
+			}))
+		})
+	}
+
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "CreateFunction20150331",
+		}))
+	})
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "lambda.amazonaws.com",
+			EventName:   "ListFunctions",
+		}))
+	})
+}
+
+func TestLifeEventSecurityServices(t *testing.T) {
+	rule := newLifeEventSecurityServices()
+
+	for _, event := range []string{
+		"DeleteDetector", "DisassociateFromMasterAccount", "DisassociateFromAdministratorAccount",
+		"DisableSecurityHub", "DeleteInsight",
+		"DeleteAlarms", "DisableAlarmActions",
+	} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{EventName: event}))
+		})
+	}
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{EventName: "DescribeDetector"}))
+	})
+}
+
 func TestLifeEventOrg(t *testing.T) {
 	rule := newLifeEventOrg()
 

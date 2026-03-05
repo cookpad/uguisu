@@ -4,7 +4,7 @@ import (
 	"github.com/cookpad/uguisu/pkg/models"
 )
 
-// CIS 3.7 – Ensure a log metric filter and alarm exist for unauthorized API calls
+// CIS 3.7 – Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs
 // https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.7-remediation
 type awsCIS3_7 struct{}
 

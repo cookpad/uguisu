@@ -4,7 +4,7 @@ import (
 	"github.com/cookpad/uguisu/pkg/models"
 )
 
-// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.1-remediation
+// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.3-remediation
 type awsCIS3_3 struct {
 }
 
