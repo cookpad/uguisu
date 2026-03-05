@@ -3,6 +3,7 @@ package uguisu
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,7 +12,6 @@ import (
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
-	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -26,6 +26,9 @@ import (
 )
 
 var logger = golambda.Logger
+
+// Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
+var Version = "dev"
 
 // Uguisu is main procedure of the package
 type Uguisu struct {
@@ -77,10 +80,10 @@ func (x *Uguisu) run(event golambda.Event) error {
 	}
 
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
-	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL)
+	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
 	for _, event := range messages {
-		logger.With("event", string(event)).Trace("event proessing")
+		logger.With("event", string(event)).Trace("event processing")
 		var s3Event events.S3Event
 		if err := event.Bind(&s3Event); err != nil {
 			return err

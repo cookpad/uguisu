@@ -11,11 +11,13 @@ type lifeEventOrg struct {
 func newLifeEventOrg() models.Rule {
 	return &lifeEventOrg{
 		targetEvents: map[string]bool{
-			"CreateAccount":      true,
-			"CreateOrganization": true,
-			"DeleteOrganization": true,
-			"AcceptHandshake":    true,
-			"LeaveOrganization":  true,
+			"CreateAccount":               true,
+			"CreateOrganization":          true,
+			"DeleteOrganization":          true,
+			"AcceptHandshake":             true,
+			"LeaveOrganization":           true,
+			"InviteAccountToOrganization": true,
+			"RemoveAccountFromOrganization": true,
 		},
 	}
 }
@@ -28,5 +30,6 @@ func (x *lifeEventOrg) Description() string {
 }
 
 func (x *lifeEventOrg) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName]
+	return record.EventSource == "organizations.amazonaws.com" &&
+		x.targetEvents[record.EventName]
 }

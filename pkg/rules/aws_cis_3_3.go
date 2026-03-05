@@ -4,7 +4,7 @@ import (
 	"github.com/cookpad/uguisu/pkg/models"
 )
 
-// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.1-remediation
+// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.3-remediation
 type awsCIS3_3 struct {
 }
 
@@ -14,7 +14,7 @@ func newAwsCIS3_3() models.Rule {
 
 func (x *awsCIS3_3) ID() string                { return "aws_cis_3.3" }
 func (x *awsCIS3_3) Title() string             { return "Usage of root account" }
-func (x *awsCIS3_3) Severity() models.Severity { return models.SeverityMedium }
+func (x *awsCIS3_3) Severity() models.Severity { return models.SeverityHigh }
 func (x *awsCIS3_3) Description() string {
 	return "AWS CIS benchmark 3.3 recommend to ensure a log metric filter and alarm exist for usage of root account"
 }

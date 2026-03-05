@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { version } = require("../package.json");
 import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as sns from "@aws-cdk/aws-sns";
@@ -65,12 +67,10 @@ export class UguisuStack extends cdk.Stack {
       bundling: {
         image: lambda.Runtime.PROVIDED_AL2.bundlingImage,
         user: 'root',
-        // command: ['find'],
-
         command: [
           'bash',
           '-c',
-          'GOOS=linux GOARCH=amd64 go build -o /asset-output/bootstrap ' + args.lambdaPackagePath,
+          `GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/cookpad/uguisu.Version=v${version}" -o /asset-output/bootstrap ` + args.lambdaPackagePath,
         ],
       },
       exclude: ["node_modules", '*/node_modules', 'cdk.out', '*/cdk.out'],

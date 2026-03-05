@@ -4,7 +4,7 @@ import (
 	"github.com/cookpad/uguisu/pkg/models"
 )
 
-// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.1-remediation
+// https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-controls.html#cis-3.6-remediation
 type awsCIS3_6 struct{}
 
 func newAwsCIS3_6() models.Rule {

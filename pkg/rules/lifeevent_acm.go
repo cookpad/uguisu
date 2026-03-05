@@ -19,7 +19,7 @@ func newLifeEventACM() models.Rule {
 	}
 }
 
-func (x *lifeEventACM) ID() string                { return "resource_lifeevent_acm.5" }
+func (x *lifeEventACM) ID() string                { return "resource_lifeevent_acm" }
 func (x *lifeEventACM) Title() string             { return "ACM certification life event" }
 func (x *lifeEventACM) Severity() models.Severity { return models.SeverityMedium }
 func (x *lifeEventACM) Description() string {
@@ -27,5 +27,6 @@ func (x *lifeEventACM) Description() string {
 }
 
 func (x *lifeEventACM) Match(record *models.CloudTrailRecord) bool {
-	return x.targetEvents[record.EventName]
+	return record.EventSource == "acm.amazonaws.com" &&
+		x.targetEvents[record.EventName]
 }

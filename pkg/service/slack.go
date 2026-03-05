@@ -25,12 +25,17 @@ const (
 type Slack struct {
 	httpClient adaptor.HTTPClient
 	webhookURL string
+	version    string
 }
 
-func NewSlack(httpClient adaptor.HTTPClient, webhookURL string) *Slack {
+func NewSlack(httpClient adaptor.HTTPClient, webhookURL, version string) *Slack {
+	if version == "" {
+		version = "dev"
+	}
 	return &Slack{
 		httpClient: httpClient,
 		webhookURL: webhookURL,
+		version:    version,
 	}
 }
 
@@ -49,7 +54,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	blocks := []slack.Block{
 		slack.NewHeaderBlock(slack.NewTextBlockObject("plain_text", alert.Title, true, false)),
 		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", alert.Description, false, false), nil, nil),
-		slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", "RuleID: "+alert.RuleID, false, false)),
+		slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", "RuleID: "+alert.RuleID+" • uguisu "+x.version, false, false)),
 	}
 
 	for _, record := range alert.Events {
@@ -96,19 +101,6 @@ func (x *Slack) Notify(alert *models.Alert) error {
 			fmt.Sprintf("UserAgent: %s", record.UserAgent),
 		}, "\n")
 		blocks = append(blocks, slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", footer, false, false)))
-
-		/*
-			objects := []*slack.TextBlockObject{
-				newField("EventName", record.EventName),
-				newField("EventTime", record.EventTime),
-				newField("EventID", record.EventID),
-				newField("Region", record.AwsRegion),
-				newField("AccountID", record.UserIdentity.AccountID),
-				newField("SourceIPAddress", record.SourceIPAddress),
-				newField("User", record.UserIdentity.ARN),
-				newField("UserAgent", record.UserAgent),
-			}
-		*/
 
 	}
 

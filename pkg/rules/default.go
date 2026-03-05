@@ -25,7 +25,13 @@ func NewDefaultRuleSet() *models.RuleSet {
 			// AWS resource life events
 			newLifeEventACM(),
 			newLifeEventEC2(),
+			newLifeEventEKS(),
+			newLifeEventIAM(),
+			newLifeEventLambda(),
 			newLifeEventRDS(),
+			newLifeEventS3(),
+			newLifeEventSecretsManager(),
+			newLifeEventSecurityServices(),
 			newLifeEventVPC(),
 			newLifeEventOrg(),
 		},
