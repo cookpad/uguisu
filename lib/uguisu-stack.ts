@@ -65,8 +65,6 @@ export class UguisuStack extends cdk.Stack {
       bundling: {
         image: lambda.Runtime.PROVIDED_AL2.bundlingImage,
         user: 'root',
-        // command: ['find'],
-
         command: [
           'bash',
           '-c',

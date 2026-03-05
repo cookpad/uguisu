@@ -11,11 +11,13 @@ type lifeEventOrg struct {
 func newLifeEventOrg() models.Rule {
 	return &lifeEventOrg{
 		targetEvents: map[string]bool{
-			"CreateAccount":      true,
-			"CreateOrganization": true,
-			"DeleteOrganization": true,
-			"AcceptHandshake":    true,
-			"LeaveOrganization":  true,
+			"CreateAccount":               true,
+			"CreateOrganization":          true,
+			"DeleteOrganization":          true,
+			"AcceptHandshake":             true,
+			"LeaveOrganization":           true,
+			"InviteAccountToOrganization": true,
+			"RemoveAccountFromOrganization": true,
 		},
 	}
 }

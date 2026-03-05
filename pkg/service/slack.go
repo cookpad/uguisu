@@ -97,19 +97,6 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		}, "\n")
 		blocks = append(blocks, slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", footer, false, false)))
 
-		/*
-			objects := []*slack.TextBlockObject{
-				newField("EventName", record.EventName),
-				newField("EventTime", record.EventTime),
-				newField("EventID", record.EventID),
-				newField("Region", record.AwsRegion),
-				newField("AccountID", record.UserIdentity.AccountID),
-				newField("SourceIPAddress", record.SourceIPAddress),
-				newField("User", record.UserIdentity.ARN),
-				newField("UserAgent", record.UserAgent),
-			}
-		*/
-
 	}
 
 	colorMap := map[models.Severity]string{

@@ -10,6 +10,32 @@ import (
 
 func strp(s string) *string { return aws.String(s) }
 
+// ── CIS 3.1 ──────────────────────────────────────────────────────────────────
+
+func TestAwsCIS3_1(t *testing.T) {
+	rule := newAwsCIS3_1()
+
+	t.Run("detects UnauthorizedOperation error", func(t *testing.T) {
+		assert.True(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("Client.UnauthorizedOperation")}))
+	})
+
+	t.Run("detects AccessDenied error", func(t *testing.T) {
+		assert.True(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("AccessDenied")}))
+	})
+
+	t.Run("detects AccessDeniedWithCapitalization", func(t *testing.T) {
+		assert.True(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("AccessDeniedException")}))
+	})
+
+	t.Run("no detection when ErrorCode is nil", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{}))
+	})
+
+	t.Run("no detection for unrelated error code", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{ErrorCode: strp("NoSuchBucket")}))
+	})
+}
+
 // ── CIS 3.2 ──────────────────────────────────────────────────────────────────
 
 func TestAwsCIS3_2(t *testing.T) {
@@ -574,12 +600,72 @@ func TestLifeEventSecurityServices(t *testing.T) {
 	})
 }
 
+func TestLifeEventEKS(t *testing.T) {
+	rule := newLifeEventEKS()
+
+	for _, event := range []string{"CreateCluster", "DeleteCluster"} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "eks.amazonaws.com",
+				EventName:   event,
+			}))
+		})
+	}
+
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "CreateCluster",
+		}))
+	})
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "eks.amazonaws.com",
+			EventName:   "DescribeCluster",
+		}))
+	})
+}
+
+func TestLifeEventSecretsManager(t *testing.T) {
+	rule := newLifeEventSecretsManager()
+
+	for _, event := range []string{
+		"CreateSecret", "DeleteSecret", "UpdateSecret",
+		"RotateSecret", "PutResourcePolicy", "DeleteResourcePolicy",
+	} {
+		event := event
+		t.Run("detects "+event, func(t *testing.T) {
+			assert.True(t, rule.Match(&models.CloudTrailRecord{
+				EventSource: "secretsmanager.amazonaws.com",
+				EventName:   event,
+			}))
+		})
+	}
+
+	t.Run("no detection for wrong event source", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "ec2.amazonaws.com",
+			EventName:   "DeleteSecret",
+		}))
+	})
+
+	t.Run("no detection for unrelated event", func(t *testing.T) {
+		assert.False(t, rule.Match(&models.CloudTrailRecord{
+			EventSource: "secretsmanager.amazonaws.com",
+			EventName:   "GetSecretValue",
+		}))
+	})
+}
+
 func TestLifeEventOrg(t *testing.T) {
 	rule := newLifeEventOrg()
 
 	for _, event := range []string{
 		"CreateAccount", "CreateOrganization", "DeleteOrganization",
 		"AcceptHandshake", "LeaveOrganization",
+		"InviteAccountToOrganization", "RemoveAccountFromOrganization",
 	} {
 		event := event
 		t.Run("detects "+event, func(t *testing.T) {
