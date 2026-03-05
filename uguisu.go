@@ -27,6 +27,9 @@ import (
 
 var logger = golambda.Logger
 
+// Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
+var Version = "dev"
+
 // Uguisu is main procedure of the package
 type Uguisu struct {
 	NewS3      adaptor.S3ClientFactory
@@ -77,7 +80,7 @@ func (x *Uguisu) run(event golambda.Event) error {
 	}
 
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
-	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL)
+	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
 	for _, event := range messages {
 		logger.With("event", string(event)).Trace("event proessing")
