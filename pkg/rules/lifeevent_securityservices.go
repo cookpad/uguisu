@@ -29,7 +29,7 @@ func newLifeEventSecurityServices() models.Rule {
 }
 
 func (x *lifeEventSecurityServices) ID() string                { return "resource_lifeevent_security_services" }
-func (x *lifeEventSecurityServices) Title() string             { return "Security Service Disabled" }
+func (x *lifeEventSecurityServices) Title() string             { return "Security Services Disabled/Deleted" }
 func (x *lifeEventSecurityServices) Severity() models.Severity { return models.SeverityHigh }
 func (x *lifeEventSecurityServices) Description() string {
 	return "Monitoring disabling or deletion of security services including GuardDuty, Security Hub, and CloudWatch alarms"

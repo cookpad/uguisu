@@ -29,6 +29,9 @@ type Slack struct {
 }
 
 func NewSlack(httpClient adaptor.HTTPClient, webhookURL, version string) *Slack {
+	if version == "" {
+		version = "dev"
+	}
 	return &Slack{
 		httpClient: httpClient,
 		webhookURL: webhookURL,

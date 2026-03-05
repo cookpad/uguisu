@@ -3,13 +3,12 @@ package uguisu
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
-
-	"context"
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
