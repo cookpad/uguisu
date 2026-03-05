@@ -28,6 +28,7 @@ func (x *lifeEventEC2) Match(record *models.CloudTrailRecord) bool {
 	if record.SourceIPAddress == "autoscaling.amazonaws.com" ||
 		record.SourceIPAddress == "batch.amazonaws.com" ||
 		record.SourceIPAddress == "ecs-compute.amazonaws.com" ||
+		record.SourceIPAddress == "ec2fleet.amazonaws.com" ||
 		record.SourceIPAddress == "ecs.amazonaws.com" {
 		return false
 	}
