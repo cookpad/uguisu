@@ -38,6 +38,7 @@ type Uguisu struct {
 	Rules           *models.RuleSet
 	Filters         AlertFilters
 	SlackWebhookURL string `env:"SLACK_WEBHOOK_URL"`
+	SlackChannel    string `env:"SLACK_CHANNEL"`
 	DisabledRules   string `env:"DISABLED_RULES"`
 }
 
@@ -80,7 +81,7 @@ func (x *Uguisu) run(event golambda.Event) error {
 	}
 
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
-	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
+	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, x.SlackChannel, Version)
 
 	for _, event := range messages {
 		logger.With("event", string(event)).Trace("event processing")

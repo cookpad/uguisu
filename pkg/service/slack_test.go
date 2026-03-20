@@ -39,7 +39,7 @@ func baseAlert() *models.Alert {
 
 func TestSlackNotify_PostsToWebhook(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	require.NoError(t, svc.Notify(baseAlert()))
 	require.Equal(t, 1, httpClient.RequestNum())
@@ -49,9 +49,20 @@ func TestSlackNotify_PostsToWebhook(t *testing.T) {
 	assert.Equal(t, "https://hooks.example.com/webhook", req.URL.String())
 }
 
+func TestSlackNotify_WithChannel(t *testing.T) {
+	httpClient := &mock.HTTPClient{}
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "#test-channel", "test")
+
+	require.NoError(t, svc.Notify(baseAlert()))
+	require.Equal(t, 1, httpClient.RequestNum())
+
+	body := httpClient.Body(0)
+	assert.Contains(t, body, "#test-channel")
+}
+
 func TestSlackNotify_PayloadContainsAlertFields(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	require.NoError(t, svc.Notify(baseAlert()))
 
@@ -77,7 +88,7 @@ func TestSlackNotify_SeverityColors(t *testing.T) {
 		tc := tc
 		t.Run(string(tc.sev), func(t *testing.T) {
 			httpClient := &mock.HTTPClient{}
-			svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+			svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 			alert := baseAlert()
 			alert.Sev = tc.sev
 			require.NoError(t, svc.Notify(alert))
@@ -88,7 +99,7 @@ func TestSlackNotify_SeverityColors(t *testing.T) {
 
 func TestSlackNotify_IncludesErrorCode(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	alert := baseAlert()
 	alert.Events[0].ErrorCode = aws.String("UnauthorizedOperation")
@@ -99,7 +110,7 @@ func TestSlackNotify_IncludesErrorCode(t *testing.T) {
 
 func TestSlackNotify_IncludesErrorMessage(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	alert := baseAlert()
 	alert.Events[0].ErrorMessage = aws.String("Failed authentication")
@@ -110,7 +121,7 @@ func TestSlackNotify_IncludesErrorMessage(t *testing.T) {
 
 func TestSlackNotify_IncludesRequestParameters(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	alert := baseAlert()
 	alert.Events[0].RequestParameters = map[string]interface{}{"bucketName": "my-bucket"}
@@ -122,7 +133,7 @@ func TestSlackNotify_IncludesRequestParameters(t *testing.T) {
 
 func TestSlackNotify_TruncatesLongRequestParameters(t *testing.T) {
 	httpClient := &mock.HTTPClient{}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 
 	alert := baseAlert()
 	alert.Events[0].RequestParameters = map[string]interface{}{
@@ -141,14 +152,14 @@ func TestSlackNotify_TruncatesLongRequestParameters(t *testing.T) {
 }
 
 func TestSlackNotify_ErrorOnNilHTTPClient(t *testing.T) {
-	svc := service.NewSlack(nil, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(nil, "https://hooks.example.com/webhook", "", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTPClient is required")
 }
 
 func TestSlackNotify_ErrorOnEmptyWebhookURL(t *testing.T) {
-	svc := service.NewSlack(&mock.HTTPClient{}, "", "test")
+	svc := service.NewSlack(&mock.HTTPClient{}, "", "", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "webhookURL is required")
@@ -159,7 +170,7 @@ func TestSlackNotify_ErrorOnNon200Response(t *testing.T) {
 		RespCode: http.StatusInternalServerError,
 		RespBody: io.NopCloser(strings.NewReader("internal error")),
 	}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Failed to post message to slack in API")
@@ -174,7 +185,7 @@ func TestSlackNotify_RetriesOn429ThenSucceeds(t *testing.T) {
 			{Code: http.StatusOK},
 		},
 	}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 	err := svc.Notify(baseAlert())
 	require.NoError(t, err)
 	assert.Equal(t, 3, httpClient.RequestNum())
@@ -187,7 +198,7 @@ func TestSlackNotify_ErrorAfterMaxRetries429(t *testing.T) {
 			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"0"}}},
 		},
 	}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "max retries exceeded")
@@ -202,7 +213,7 @@ func TestSlackNotify_ErrorOnExcessiveRetryAfter(t *testing.T) {
 			{Code: http.StatusTooManyRequests, Headers: http.Header{"Retry-After": []string{"3600"}}},
 		},
 	}
-	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
+	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "excessive Retry-After")
@@ -216,7 +227,7 @@ func TestSlackIntegration(t *testing.T) {
 		t.Skip("TEST_SLACK_URL is not set")
 	}
 
-	svc := service.NewSlack(&http.Client{}, url, "test")
+	svc := service.NewSlack(&http.Client{}, url, "", "test")
 	alert := baseAlert()
 	alert.Title = "Integration test alert"
 	alert.Events[0].ErrorCode = aws.String("some-error")

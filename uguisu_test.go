@@ -7,15 +7,16 @@ import (
 	"io"
 	"testing"
 
-	"github.com/aws/aws-lambda-go/events"
 	"context"
+
+	"github.com/aws/aws-lambda-go/events"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
-	"github.com/m-mizutani/golambda"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
+	"github.com/google/uuid"
+	"github.com/m-mizutani/golambda"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,6 +58,7 @@ func TestUguisuBasic(t *testing.T) {
 	ug.NewS3 = newS3
 	ug.HTTPClient = httpClient
 	ug.SlackWebhookURL = "https://test.example.com/endpoint"
+	ug.SlackChannel = "#test"
 
 	s3Region := "us-east-0"
 	s3Bucket := "your-ct-logs"
@@ -89,4 +91,5 @@ func TestUguisuBasic(t *testing.T) {
 	sentData, err := io.ReadAll(httpClient.Requests[0].Body)
 	require.NoError(t, err)
 	assert.Contains(t, string(sentData), "AWS CIS benchmark 3.1 ")
+	assert.Contains(t, string(sentData), "#test")
 }

@@ -25,16 +25,18 @@ const (
 type Slack struct {
 	httpClient adaptor.HTTPClient
 	webhookURL string
+	channel    string
 	version    string
 }
 
-func NewSlack(httpClient adaptor.HTTPClient, webhookURL, version string) *Slack {
+func NewSlack(httpClient adaptor.HTTPClient, webhookURL, channel, version string) *Slack {
 	if version == "" {
 		version = "dev"
 	}
 	return &Slack{
 		httpClient: httpClient,
 		webhookURL: webhookURL,
+		channel:    channel,
 		version:    version,
 	}
 }
@@ -111,6 +113,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	}
 
 	msg := slack.WebhookMessage{
+		Channel: x.channel,
 		Attachments: []slack.Attachment{
 			{
 				Color: colorMap[alert.Sev],
