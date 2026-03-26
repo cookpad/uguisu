@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,8 +12,8 @@ import (
 	"time"
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/logx"
 	"github.com/cookpad/uguisu/pkg/models"
-	"github.com/m-mizutani/golambda"
 	"github.com/slack-go/slack"
 )
 
@@ -45,10 +46,10 @@ func newField(title, value string) *slack.TextBlockObject {
 
 func (x *Slack) Notify(alert *models.Alert) error {
 	if x.httpClient == nil {
-		return golambda.NewError("HTTPClient is required to emit Slack, but not set")
+		return errors.New("HTTPClient is required to emit Slack, but not set")
 	}
 	if x.webhookURL == "" {
-		return golambda.NewError("webhookURL is required to emit Slack, but not set")
+		return errors.New("webhookURL is required to emit Slack, but not set")
 	}
 
 	blocks := []slack.Block{
@@ -123,7 +124,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 	raw, err := json.Marshal(msg)
 	if err != nil {
-		return golambda.WrapError(err, "Failed to unmarshal slack message").With("msg", msg)
+		return fmt.Errorf("Failed to unmarshal slack message: %w", err)
 	}
 
 	// doAttempt performs a single POST.
@@ -133,12 +134,12 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	doAttempt := func() (bool, time.Duration, error) {
 		req, err := http.NewRequest("POST", x.webhookURL, bytes.NewBuffer(raw))
 		if err != nil {
-			return false, 0, golambda.WrapError(err, "Failed to create a new HTTP request to Slack")
+			return false, 0, fmt.Errorf("Failed to create a new HTTP request to Slack: %w", err)
 		}
 
 		resp, err := x.httpClient.Do(req)
 		if err != nil {
-			return false, 0, golambda.WrapError(err, "Failed to post message to slack in communication").With("msg", msg)
+			return false, 0, fmt.Errorf("Failed to post message to slack in communication: %w", err)
 		}
 		defer resp.Body.Close() //nolint:errcheck
 
@@ -154,10 +155,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 		if resp.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(resp.Body)
-			return false, 0, golambda.NewError("Failed to post message to slack in API").
-				With("msg", msg).
-				With("code", resp.StatusCode).
-				With("body", string(body))
+			return false, 0, fmt.Errorf("Failed to post message to slack in API: code=%d body=%s", resp.StatusCode, string(body))
 		}
 
 		return false, 0, nil
@@ -174,17 +172,13 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		}
 		lastWait = wait
 		if wait > maxRetryAfter {
-			return golambda.NewError("Rate limited by Slack API with excessive Retry-After, giving up").
-				With("retry_after", wait.String()).
-				With("max_retry_after", maxRetryAfter.String())
+			return fmt.Errorf("Rate limited by Slack API with excessive Retry-After, giving up: retry_after=%s max_retry_after=%s", wait, maxRetryAfter)
 		}
 		if attempt < maxRetries {
-			golambda.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
+			logx.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
 			time.Sleep(wait)
 		}
 	}
 
-	return golambda.NewError("Rate limited by Slack API, max retries exceeded").
-		With("retry_after", lastWait.String()).
-		With("attempts", maxRetries+1)
+	return fmt.Errorf("Rate limited by Slack API, max retries exceeded: retry_after=%s attempts=%d", lastWait, maxRetries+1)
 }

@@ -3,7 +3,7 @@ package uguisu
 import (
 	"fmt"
 
-	"github.com/m-mizutani/golambda"
+	"github.com/cookpad/uguisu/pkg/logx"
 	"github.com/cookpad/uguisu/pkg/models"
 )
 
@@ -20,7 +20,7 @@ func (x AlertFilters) filter(alert *models.Alert) bool {
 
 	for _, filter := range x {
 		if !filter(alert) {
-			golambda.Logger.With("filter", fmt.Sprintf("%v", filter)).Debug("Alert filtered")
+			logx.Logger.With("filter", fmt.Sprintf("%v", filter)).Debug("Alert filtered")
 			return false
 		}
 	}

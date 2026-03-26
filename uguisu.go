@@ -12,20 +12,23 @@ import (
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
-	"github.com/m-mizutani/golambda"
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/lambdaevt"
+	"github.com/cookpad/uguisu/pkg/logx"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/cookpad/uguisu/pkg/rules"
 	"github.com/cookpad/uguisu/pkg/service"
 )
 
-var logger = golambda.Logger
+var logger = logx.Logger
 
 // Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
 var Version = "dev"
@@ -58,18 +61,26 @@ func New() *Uguisu {
 	return u
 }
 
-// Start invokes lambda.Start via golambda.Start. Start() manage not only main procedure but also error handling. Then a developer to use uguisu need to configure uguisu before calling Start().
+// Start runs the Lambda handler (logging, request ID context, then processing).
 func (x *Uguisu) Start() {
-	golambda.Start(func(event golambda.Event) (interface{}, error) {
-		if err := x.run(event); err != nil {
+	lambda.Start(func(ctx context.Context, origin interface{}) (interface{}, error) {
+		logx.Logger.With("event", origin).Info("Lambda start")
+
+		if lc, ok := lambdacontext.FromContext(ctx); ok {
+			logx.Logger.Set("lambda.requestID", lc.AwsRequestID)
+		}
+
+		ev := lambdaevt.Event{Ctx: ctx, Origin: origin}
+		if err := x.run(ev); err != nil {
+			logx.Logger.Entry().Error(err.Error())
 			return nil, err
 		}
 		return nil, nil
 	})
 }
 
-// run is invoked without golambda.Start. It's exported for testing
-func (x *Uguisu) run(event golambda.Event) error {
+// run is invoked without Start; exported for testing.
+func (x *Uguisu) run(event lambdaevt.Event) error {
 	for _, filter := range x.Filters {
 		logger.With("filter(addr)", fmt.Sprintf("%v", filter)).Debug("Set filter")
 	}
@@ -181,7 +192,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		panic(err)
 	}
 
-	var event golambda.Event
+	var event lambdaevt.Event
 	err = event.EncapSNSonSQSMessage(events.S3Event{
 		Records: []events.S3EventRecord{
 			{

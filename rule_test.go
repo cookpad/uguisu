@@ -6,11 +6,12 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/google/uuid"
-	"github.com/m-mizutani/golambda"
-	"github.com/cookpad/uguisu/pkg/mock"
-	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cookpad/uguisu/pkg/lambdaevt"
+	"github.com/cookpad/uguisu/pkg/mock"
+	"github.com/cookpad/uguisu/pkg/models"
 )
 
 func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient) {
@@ -34,7 +35,7 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 
 	putData(s3Client, s3Region, s3Bucket, s3Key, records)
 
-	var event golambda.Event
+	var event lambdaevt.Event
 	err := event.EncapSNSonSQSMessage(events.S3Event{
 		Records: []events.S3EventRecord{
 			{
