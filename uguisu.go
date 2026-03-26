@@ -7,13 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-lambda-go/lambdacontext"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -21,14 +21,12 @@ import (
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
 	"github.com/cookpad/uguisu/pkg/lambdaevt"
-	"github.com/cookpad/uguisu/pkg/logx"
+	"github.com/cookpad/uguisu/pkg/log"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/cookpad/uguisu/pkg/rules"
 	"github.com/cookpad/uguisu/pkg/service"
 )
-
-var logger = logx.Logger
 
 // Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
 var Version = "dev"
@@ -61,18 +59,15 @@ func New() *Uguisu {
 	return u
 }
 
-// Start runs the Lambda handler (logging, request ID context, then processing).
+// Start runs the Lambda handler (logging, request ID on default logger for this invocation, then processing).
 func (x *Uguisu) Start() {
 	lambda.Start(func(ctx context.Context, origin interface{}) (interface{}, error) {
-		logx.Logger.With("event", origin).Info("Lambda start")
-
-		if lc, ok := lambdacontext.FromContext(ctx); ok {
-			logx.Logger.Set("lambda.requestID", lc.AwsRequestID)
-		}
+		slog.SetDefault(slog.New(log.Handler(ctx)))
+		slog.Info("Lambda start", "event", origin)
 
 		ev := lambdaevt.Event{Ctx: ctx, Origin: origin}
 		if err := x.run(ev); err != nil {
-			logx.Logger.Entry().Error(err.Error())
+			slog.Error(err.Error())
 			return nil, err
 		}
 		return nil, nil
@@ -82,7 +77,7 @@ func (x *Uguisu) Start() {
 // run is invoked without Start; exported for testing.
 func (x *Uguisu) run(event lambdaevt.Event) error {
 	for _, filter := range x.Filters {
-		logger.With("filter(addr)", fmt.Sprintf("%v", filter)).Debug("Set filter")
+		slog.Debug("Set filter", "filter(addr)", fmt.Sprintf("%v", filter))
 	}
 
 	messages, err := event.DecapSNSonSQSMessage()
@@ -93,16 +88,22 @@ func (x *Uguisu) run(event lambdaevt.Event) error {
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
 	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
-	for _, event := range messages {
-		logger.With("event", string(event)).Trace("event processing")
+	logCtx := event.Ctx
+	if logCtx == nil {
+		logCtx = context.Background()
+	}
+
+	for _, rec := range messages {
+		slog.Log(logCtx, slog.LevelDebug, "event processing", "event", string(rec))
 		var s3Event events.S3Event
-		if err := event.Bind(&s3Event); err != nil {
+		if err := rec.Bind(&s3Event); err != nil {
 			return err
 		}
-		logger.With("s3Event", s3Event).Trace("Binding s3Event")
+		slog.Log(logCtx, slog.LevelDebug, "Binding s3Event", "s3Event", s3Event)
 
 		for _, s3Record := range s3Event.Records {
 			if err := handleS3Object(
+				logCtx,
 				ctSvc,
 				slackSvc,
 				x.Rules,
@@ -119,7 +120,7 @@ func (x *Uguisu) run(event lambdaevt.Event) error {
 	return nil
 }
 
-func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rules *models.RuleSet, filters AlertFilters, region, bucket, key string) error {
+func handleS3Object(ctx context.Context, ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rules *models.RuleSet, filters AlertFilters, region, bucket, key string) error {
 	records, err := ctSvc.Read(region, bucket, key)
 	if err != nil {
 		return err
@@ -139,7 +140,7 @@ func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rule
 		}
 	}
 
-	logger.With("processed", len(records)).Trace("handleS3Object completed")
+	slog.Log(ctx, slog.LevelDebug, "handleS3Object completed", "processed", len(records))
 
 	return nil
 }

@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
-	"github.com/cookpad/uguisu/pkg/logx"
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/slack-go/slack"
 )
@@ -175,7 +175,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 			return fmt.Errorf("Rate limited by Slack API with excessive Retry-After, giving up: retry_after=%s max_retry_after=%s", wait, maxRetryAfter)
 		}
 		if attempt < maxRetries {
-			logx.Logger.With("attempt", attempt+1).With("wait", wait.String()).Info("Rate limited by Slack, retrying")
+			slog.Info("Rate limited by Slack, retrying", "attempt", attempt+1, "wait", wait.String())
 			time.Sleep(wait)
 		}
 	}
