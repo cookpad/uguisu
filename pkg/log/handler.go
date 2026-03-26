@@ -14,7 +14,10 @@ func Handler(ctx context.Context) slog.Handler {
 
 	h := slog.NewJSONHandler(os.Stdout, opts)
 	if lc, ok := lambdacontext.FromContext(ctx); ok {
-		return h.WithAttrs([]slog.Attr{slog.String("request_id", lc.AwsRequestID)})
+		return h.WithAttrs([]slog.Attr{
+			slog.String("request_id", lc.AwsRequestID),
+			slog.String("function_arn", lc.InvokedFunctionArn),
+		})
 	}
 	return h
 }
