@@ -24,6 +24,7 @@ import (
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/cookpad/uguisu/pkg/rules"
 	"github.com/cookpad/uguisu/pkg/service"
+	"github.com/cookpad/uguisu/pkg/sqs"
 )
 
 // Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
@@ -63,32 +64,25 @@ func (x *Uguisu) Start() {
 		defer flushSentry()
 
 		slog.SetDefault(slog.New(log.Handler(ctx)))
-		if err := x.run(ctx, extractEvents(event)); err != nil {
-			if id := captureSentryError(ctx, err); id != nil {
-				slog.Error(err.Error(), "sentry_event_id", string(*id))
-			} else {
-				slog.Error(err.Error())
-			}
+		evts, err := sqs.ExtractEvents(event)
+		if err != nil {
+			logError(ctx, err)
+			return err
+		}
+		if err := x.run(ctx, evts); err != nil {
+			logError(ctx, err)
 			return err
 		}
 		return nil
 	})
 }
 
-func extractEvents(event *events.SQSEvent) []events.S3Event {
-	var output []events.S3Event
-	for _, record := range event.Records {
-		var snsEntity events.SNSEntity
-		if err := json.Unmarshal([]byte(record.Body), &snsEntity); err != nil {
-			slog.Error("failed to unmarshal sns entity", "error", err)
-		}
-		var s3Event events.S3Event
-		if err := json.Unmarshal([]byte(snsEntity.Message), &s3Event); err != nil {
-			slog.Error("failed to unmarshal S3 event", "error", err)
-		}
-		output = append(output, s3Event)
+func logError(ctx context.Context, err error) {
+	if id := captureSentryError(ctx, err); id != nil {
+		slog.Error(err.Error(), "sentry_event_id", string(*id))
+	} else {
+		slog.Error(err.Error())
 	}
-	return output
 }
 
 // run is invoked without Start; exported for testing.
