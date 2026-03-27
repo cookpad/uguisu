@@ -1,6 +1,7 @@
 package uguisu
 
 import (
+	"context"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cookpad/uguisu/pkg/lambdaevt"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 )
@@ -35,23 +35,21 @@ func runRuleTest(records []*models.CloudTrailRecord) ([]string, *mock.HTTPClient
 
 	putData(s3Client, s3Region, s3Bucket, s3Key, records)
 
-	var event lambdaevt.Event
-	err := event.EncapSNSonSQSMessage(events.S3Event{
-		Records: []events.S3EventRecord{
-			{
-				AWSRegion: s3Region,
-				S3: events.S3Entity{
-					Bucket: events.S3Bucket{Name: s3Bucket},
-					Object: events.S3Object{Key: s3Key},
+	event := []events.S3Event{
+		{
+			Records: []events.S3EventRecord{
+				{
+					AWSRegion: s3Region,
+					S3: events.S3Entity{
+						Bucket: events.S3Bucket{Name: s3Bucket},
+						Object: events.S3Object{Key: s3Key},
+					},
 				},
 			},
 		},
-	})
-	if err != nil {
-		panic(err)
 	}
 
-	if err := ug.run(event); err != nil {
+	if err := ug.run(context.Background(), event); err != nil {
 		panic(err)
 	}
 

@@ -14,13 +14,11 @@ import (
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
-	"github.com/cookpad/uguisu/pkg/lambdaevt"
 	"github.com/cookpad/uguisu/pkg/log"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
@@ -61,49 +59,44 @@ func New() *Uguisu {
 
 // Start runs the Lambda handler (logging, request ID on default logger for this invocation, then processing).
 func (x *Uguisu) Start() {
-	lambda.Start(func(ctx context.Context, origin interface{}) (interface{}, error) {
+	lambda.Start(func(ctx context.Context, event *events.SQSEvent) error {
 		slog.SetDefault(slog.New(log.Handler(ctx)))
-		slog.Info("Lambda start", "event", origin)
-
-		ev := lambdaevt.Event{Ctx: ctx, Origin: origin}
-		if err := x.run(ev); err != nil {
+		if err := x.run(ctx, extractEvents(event)); err != nil {
 			slog.Error(err.Error())
-			return nil, err
+			return err
 		}
-		return nil, nil
+		return nil
 	})
 }
 
+func extractEvents(event *events.SQSEvent) []events.S3Event {
+	var output []events.S3Event
+	for _, record := range event.Records {
+		var snsEntity events.SNSEntity
+		if err := json.Unmarshal([]byte(record.Body), &snsEntity); err != nil {
+			slog.Error("failed to unnmarshal sns entity", "error", err)
+		}
+		var s3Event events.S3Event
+		if err := json.Unmarshal([]byte(snsEntity.Message), &s3Event); err != nil {
+			slog.Error("failed to unnmarshal S3 event", "error", err)
+		}
+		output = append(output, s3Event)
+	}
+	return output
+}
+
 // run is invoked without Start; exported for testing.
-func (x *Uguisu) run(event lambdaevt.Event) error {
+func (x *Uguisu) run(ctx context.Context, events []events.S3Event) error {
 	for _, filter := range x.Filters {
 		slog.Debug("Set filter", "filter(addr)", fmt.Sprintf("%v", filter))
 	}
-
-	messages, err := event.DecapSNSonSQSMessage()
-	if err != nil {
-		return err
-	}
-
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
 	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
-	logCtx := event.Ctx
-	if logCtx == nil {
-		logCtx = context.Background()
-	}
-
-	for _, rec := range messages {
-		slog.Log(logCtx, slog.LevelDebug, "event processing", "event", string(rec))
-		var s3Event events.S3Event
-		if err := rec.Bind(&s3Event); err != nil {
-			return err
-		}
-		slog.Log(logCtx, slog.LevelDebug, "Binding s3Event", "s3Event", s3Event)
-
-		for _, s3Record := range s3Event.Records {
+	for _, event := range events {
+		for _, s3Record := range event.Records {
 			if err := handleS3Object(
-				logCtx,
+				ctx,
 				ctSvc,
 				slackSvc,
 				x.Rules,
@@ -193,23 +186,22 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		panic(err)
 	}
 
-	var event lambdaevt.Event
-	err = event.EncapSNSonSQSMessage(events.S3Event{
-		Records: []events.S3EventRecord{
-			{
-				AWSRegion: s3Region,
-				S3: events.S3Entity{
-					Bucket: events.S3Bucket{Name: s3Bucket},
-					Object: events.S3Object{Key: s3Key},
+	events := []events.S3Event{
+
+		{
+			Records: []events.S3EventRecord{
+				{
+					AWSRegion: s3Region,
+					S3: events.S3Entity{
+						Bucket: events.S3Bucket{Name: s3Bucket},
+						Object: events.S3Object{Key: s3Key},
+					},
 				},
 			},
 		},
-	})
-	if err != nil {
-		panic(err)
 	}
 
-	if err := x.run(event); err != nil {
+	if err := x.run(context.Background(), events); err != nil {
 		panic(err)
 	}
 

@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cookpad/uguisu/pkg/lambdaevt"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 )
@@ -68,20 +67,21 @@ func TestUguisuBasic(t *testing.T) {
 		},
 	})
 
-	var event lambdaevt.Event
-	require.NoError(t, event.EncapSNSonSQSMessage(events.S3Event{
-		Records: []events.S3EventRecord{
-			{
-				AWSRegion: s3Region,
-				S3: events.S3Entity{
-					Bucket: events.S3Bucket{Name: s3Bucket},
-					Object: events.S3Object{Key: s3Key},
+	events := []events.S3Event{
+		{
+			Records: []events.S3EventRecord{
+				{
+					AWSRegion: s3Region,
+					S3: events.S3Entity{
+						Bucket: events.S3Bucket{Name: s3Bucket},
+						Object: events.S3Object{Key: s3Key},
+					},
 				},
 			},
 		},
-	}))
+	}
 
-	require.NoError(t, ug.run(event))
+	require.NoError(t, ug.run(context.Background(), events))
 	require.Equal(t, 1, len(httpClient.Requests))
 	assert.Equal(t, "test.example.com", httpClient.Requests[0].URL.Host)
 	assert.Equal(t, "/endpoint", httpClient.Requests[0].URL.Path)
