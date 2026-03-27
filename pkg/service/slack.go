@@ -124,7 +124,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 	raw, err := json.Marshal(msg)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal slack message: %w", err)
+		return fmt.Errorf("failed to marshal slack message: %w", err)
 	}
 
 	// doAttempt performs a single POST.
