@@ -67,7 +67,7 @@ func TestUguisuBasic(t *testing.T) {
 		},
 	})
 
-	events := []events.S3Event{
+	s3Events := []events.S3Event{
 		{
 			Records: []events.S3EventRecord{
 				{
@@ -81,7 +81,7 @@ func TestUguisuBasic(t *testing.T) {
 		},
 	}
 
-	require.NoError(t, ug.run(context.Background(), events))
+	require.NoError(t, ug.run(context.Background(), s3Events))
 	require.Equal(t, 1, len(httpClient.Requests))
 	assert.Equal(t, "test.example.com", httpClient.Requests[0].URL.Host)
 	assert.Equal(t, "/endpoint", httpClient.Requests[0].URL.Path)
