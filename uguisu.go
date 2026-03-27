@@ -186,7 +186,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		panic(err)
 	}
 
-	events := []events.S3Event{
+	s3Events := []events.S3Event{
 
 		{
 			Records: []events.S3EventRecord{
@@ -201,7 +201,7 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		},
 	}
 
-	if err := x.run(context.Background(), events); err != nil {
+	if err := x.run(context.Background(), s3Events); err != nil {
 		panic(err)
 	}
 
