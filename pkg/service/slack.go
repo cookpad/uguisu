@@ -46,7 +46,7 @@ func newField(title, value string) *slack.TextBlockObject {
 
 func (x *Slack) Notify(alert *models.Alert) error {
 	if x.httpClient == nil {
-		return errors.New("HTTPClient is required to emit Slack, but not set")
+		return errors.New("httpClient is required to emit Slack, but not set")
 	}
 	if x.webhookURL == "" {
 		return errors.New("webhookURL is required to emit Slack, but not set")

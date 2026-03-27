@@ -144,7 +144,7 @@ func TestSlackNotify_ErrorOnNilHTTPClient(t *testing.T) {
 	svc := service.NewSlack(nil, "https://hooks.example.com/webhook", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "HTTPClient is required")
+	assert.Contains(t, err.Error(), "httpClient is required")
 }
 
 func TestSlackNotify_ErrorOnEmptyWebhookURL(t *testing.T) {
