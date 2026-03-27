@@ -37,7 +37,7 @@ func (x *CloudTrailLogs) Read(s3Region, s3Bucket, s3Key string) ([]*models.Cloud
 
 	output, err := s3Client.GetObject(context.Background(), input)
 	if err != nil {
-		return nil, fmt.Errorf("failed to download cloudtrail log object: %w", err)
+		return nil, fmt.Errorf("failed to download CloudTrail log object from region=%s, bucket=%s, key=%s: %w", s3Region, s3Bucket, s3Key, err)
 	}
 	defer output.Body.Close() //nolint:errcheck
 
