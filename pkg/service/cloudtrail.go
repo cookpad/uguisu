@@ -37,7 +37,7 @@ func (x *CloudTrailLogs) Read(s3Region, s3Bucket, s3Key string) ([]*models.Cloud
 
 	output, err := s3Client.GetObject(context.Background(), input)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to download cloudtrail log object: %w", err)
+		return nil, fmt.Errorf("failed to download cloudtrail log object: %w", err)
 	}
 	defer output.Body.Close() //nolint:errcheck
 
@@ -45,7 +45,7 @@ func (x *CloudTrailLogs) Read(s3Region, s3Bucket, s3Key string) ([]*models.Cloud
 	if strings.HasSuffix(s3Key, ".gz") {
 		gz, err := gzip.NewReader(output.Body)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to create gzip reader for CloudTrail log: %w", err)
+			return nil, fmt.Errorf("failed to create gzip reader for CloudTrail log: %w", err)
 		}
 		defer gz.Close() //nolint:errcheck
 		reader = gz
@@ -54,7 +54,7 @@ func (x *CloudTrailLogs) Read(s3Region, s3Bucket, s3Key string) ([]*models.Cloud
 	decoder := json.NewDecoder(reader)
 	var object models.CloudTrailLogObject
 	if err := decoder.Decode(&object); err != nil {
-		return nil, fmt.Errorf("Failed to decode CloudTrail logs: %w", err)
+		return nil, fmt.Errorf("failed to decode CloudTrail logs: %w", err)
 	}
 
 	return object.Records, nil

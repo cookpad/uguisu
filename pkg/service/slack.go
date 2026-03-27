@@ -124,7 +124,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 	raw, err := json.Marshal(msg)
 	if err != nil {
-		return fmt.Errorf("Failed to unmarshal slack message: %w", err)
+		return fmt.Errorf("failed to unmarshal slack message: %w", err)
 	}
 
 	// doAttempt performs a single POST.
@@ -134,12 +134,12 @@ func (x *Slack) Notify(alert *models.Alert) error {
 	doAttempt := func() (bool, time.Duration, error) {
 		req, err := http.NewRequest("POST", x.webhookURL, bytes.NewBuffer(raw))
 		if err != nil {
-			return false, 0, fmt.Errorf("Failed to create a new HTTP request to Slack: %w", err)
+			return false, 0, fmt.Errorf("failed to create a new HTTP request to Slack: %w", err)
 		}
 
 		resp, err := x.httpClient.Do(req)
 		if err != nil {
-			return false, 0, fmt.Errorf("Failed to post message to slack in communication: %w", err)
+			return false, 0, fmt.Errorf("failed to post message to slack in communication: %w", err)
 		}
 		defer resp.Body.Close() //nolint:errcheck
 
@@ -155,7 +155,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 
 		if resp.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(resp.Body)
-			return false, 0, fmt.Errorf("Failed to post message to slack in API: code=%d body=%s", resp.StatusCode, string(body))
+			return false, 0, fmt.Errorf("failed to post message to slack API: code=%d body=%s", resp.StatusCode, string(body))
 		}
 
 		return false, 0, nil
@@ -172,7 +172,7 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		}
 		lastWait = wait
 		if wait > maxRetryAfter {
-			return fmt.Errorf("Rate limited by Slack API with excessive Retry-After, giving up: retry_after=%s max_retry_after=%s", wait, maxRetryAfter)
+			return fmt.Errorf("rate limited by Slack API with excessive Retry-After, giving up: retry_after=%s max_retry_after=%s", wait, maxRetryAfter)
 		}
 		if attempt < maxRetries {
 			slog.Info("Rate limited by Slack, retrying", "attempt", attempt+1, "wait", wait.String())
@@ -180,5 +180,5 @@ func (x *Slack) Notify(alert *models.Alert) error {
 		}
 	}
 
-	return fmt.Errorf("Rate limited by Slack API, max retries exceeded: retry_after=%s attempts=%d", lastWait, maxRetries+1)
+	return fmt.Errorf("rate limited by Slack API, max retries exceeded: retry_after=%s attempts=%d", lastWait, maxRetries+1)
 }
