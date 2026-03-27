@@ -85,7 +85,7 @@ func logError(ctx context.Context, err error) {
 	}
 }
 
-// run is invoked without Start; exported for testing.
+// run is invoked by Start & Test - Test is exported to make testing this easy
 func (x *Uguisu) run(ctx context.Context, events []events.S3Event) error {
 	for _, filter := range x.Filters {
 		slog.Debug("Set filter", "filter(addr)", fmt.Sprintf("%v", filter))
