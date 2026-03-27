@@ -1,9 +1,8 @@
 package models
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/m-mizutani/golambda"
 )
 
 type Rule interface {
@@ -62,10 +61,8 @@ func (x *RuleSet) Diagnosis() error {
 	ruleMap := make(map[string]Rule)
 	for _, rule := range x.Rules {
 		if dup, ok := ruleMap[rule.ID()]; ok {
-			return golambda.NewError("Rule.ID in RuleSet is conflicted").
-				With("id", rule.ID()).
-				With("titleA", rule.Title()).
-				With("titleB", dup.Title())
+			return fmt.Errorf("rule.ID conflict in RuleSet: id=%q titleA=%q titleB=%q",
+				rule.ID(), rule.Title(), dup.Title())
 		}
 
 		ruleMap[rule.ID()] = rule

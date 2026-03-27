@@ -114,7 +114,7 @@ func TestCloudTrailLogs_ErrorOnMissingBucket(t *testing.T) {
 	_, err := svc.Read("us-east-1", "my-bucket", "logs/test.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to download cloudtrail log object")
+	assert.Contains(t, err.Error(), "failed to download CloudTrail log object")
 }
 
 func TestCloudTrailLogs_ErrorOnMissingKey(t *testing.T) {
@@ -124,7 +124,7 @@ func TestCloudTrailLogs_ErrorOnMissingKey(t *testing.T) {
 	_, err := svc.Read("us-east-1", "my-bucket", "logs/test.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to download cloudtrail log object")
+	assert.Contains(t, err.Error(), "failed to download CloudTrail log object")
 }
 
 func TestCloudTrailLogs_ErrorOnInvalidGzip(t *testing.T) {
@@ -133,7 +133,7 @@ func TestCloudTrailLogs_ErrorOnInvalidGzip(t *testing.T) {
 	_, err := svc.Read("us-east-1", "my-bucket", "logs/bad.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to create gzip reader for CloudTrail log")
+	assert.Contains(t, err.Error(), "failed to create gzip reader for CloudTrail log")
 }
 
 func TestCloudTrailLogs_ErrorOnInvalidJSON(t *testing.T) {
@@ -148,7 +148,7 @@ func TestCloudTrailLogs_ErrorOnInvalidJSON(t *testing.T) {
 	_, err = svc.Read("us-east-1", "my-bucket", "logs/bad.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to decode CloudTrail logs")
+	assert.Contains(t, err.Error(), "failed to decode CloudTrail logs")
 }
 
 func TestCloudTrailLogs_PassesRegionToS3Factory(t *testing.T) {

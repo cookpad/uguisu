@@ -144,7 +144,7 @@ func TestSlackNotify_ErrorOnNilHTTPClient(t *testing.T) {
 	svc := service.NewSlack(nil, "https://hooks.example.com/webhook", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "HTTPClient is required")
+	assert.Contains(t, err.Error(), "httpClient is required")
 }
 
 func TestSlackNotify_ErrorOnEmptyWebhookURL(t *testing.T) {
@@ -162,7 +162,7 @@ func TestSlackNotify_ErrorOnNon200Response(t *testing.T) {
 	svc := service.NewSlack(httpClient, "https://hooks.example.com/webhook", "test")
 	err := svc.Notify(baseAlert())
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to post message to slack in API")
+	assert.Contains(t, err.Error(), "failed to post message to slack API")
 }
 
 func TestSlackNotify_RetriesOn429ThenSucceeds(t *testing.T) {

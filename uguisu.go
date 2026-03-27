@@ -7,25 +7,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	env "github.com/Netflix/go-env"
 	"github.com/aws/aws-lambda-go/events"
-
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
-	"github.com/m-mizutani/golambda"
 
 	"github.com/cookpad/uguisu/pkg/adaptor"
+	"github.com/cookpad/uguisu/pkg/log"
 	"github.com/cookpad/uguisu/pkg/mock"
 	"github.com/cookpad/uguisu/pkg/models"
 	"github.com/cookpad/uguisu/pkg/rules"
 	"github.com/cookpad/uguisu/pkg/service"
+	"github.com/cookpad/uguisu/pkg/sqs"
 )
-
-var logger = golambda.Logger
 
 // Version is set at build time via -ldflags "-X github.com/cookpad/uguisu.Version=..."
 var Version = "dev"
@@ -58,40 +58,45 @@ func New() *Uguisu {
 	return u
 }
 
-// Start invokes lambda.Start via golambda.Start. Start() manage not only main procedure but also error handling. Then a developer to use uguisu need to configure uguisu before calling Start().
+// Start runs the Lambda handler (logging, request ID on default logger for this invocation, then processing).
 func (x *Uguisu) Start() {
-	golambda.Start(func(event golambda.Event) (interface{}, error) {
-		if err := x.run(event); err != nil {
-			return nil, err
+	lambda.Start(func(ctx context.Context, event *events.SQSEvent) error {
+		defer flushSentry()
+
+		slog.SetDefault(slog.New(log.Handler(ctx)))
+		evts, err := sqs.ExtractEvents(event)
+		if err != nil {
+			logError(ctx, err)
+			return err
 		}
-		return nil, nil
+		if err := x.run(ctx, evts); err != nil {
+			logError(ctx, err)
+			return err
+		}
+		return nil
 	})
 }
 
-// run is invoked without golambda.Start. It's exported for testing
-func (x *Uguisu) run(event golambda.Event) error {
+func logError(ctx context.Context, err error) {
+	if id := captureSentryError(ctx, err); id != nil {
+		slog.Error(err.Error(), "sentry_event_id", string(*id))
+	} else {
+		slog.Error(err.Error())
+	}
+}
+
+// run is invoked by Start & Test - Test is exported to make testing this easy
+func (x *Uguisu) run(ctx context.Context, events []events.S3Event) error {
 	for _, filter := range x.Filters {
-		logger.With("filter(addr)", fmt.Sprintf("%v", filter)).Debug("Set filter")
+		slog.Debug("Set filter", "filter(addr)", fmt.Sprintf("%v", filter))
 	}
-
-	messages, err := event.DecapSNSonSQSMessage()
-	if err != nil {
-		return err
-	}
-
 	ctSvc := service.NewCloudTrailLogs(x.NewS3)
 	slackSvc := service.NewSlack(x.HTTPClient, x.SlackWebhookURL, Version)
 
-	for _, event := range messages {
-		logger.With("event", string(event)).Trace("event processing")
-		var s3Event events.S3Event
-		if err := event.Bind(&s3Event); err != nil {
-			return err
-		}
-		logger.With("s3Event", s3Event).Trace("Binding s3Event")
-
-		for _, s3Record := range s3Event.Records {
+	for _, event := range events {
+		for _, s3Record := range event.Records {
 			if err := handleS3Object(
+				ctx,
 				ctSvc,
 				slackSvc,
 				x.Rules,
@@ -108,7 +113,7 @@ func (x *Uguisu) run(event golambda.Event) error {
 	return nil
 }
 
-func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rules *models.RuleSet, filters AlertFilters, region, bucket, key string) error {
+func handleS3Object(ctx context.Context, ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rules *models.RuleSet, filters AlertFilters, region, bucket, key string) error {
 	records, err := ctSvc.Read(region, bucket, key)
 	if err != nil {
 		return err
@@ -128,7 +133,7 @@ func handleS3Object(ctSvc *service.CloudTrailLogs, slackSvc *service.Slack, rule
 		}
 	}
 
-	logger.With("processed", len(records)).Trace("handleS3Object completed")
+	slog.Log(ctx, slog.LevelDebug, "handleS3Object completed", "processed", len(records))
 
 	return nil
 }
@@ -181,23 +186,22 @@ func (x *Uguisu) Test(records []*models.CloudTrailRecord) []*models.CloudTrailRe
 		panic(err)
 	}
 
-	var event golambda.Event
-	err = event.EncapSNSonSQSMessage(events.S3Event{
-		Records: []events.S3EventRecord{
-			{
-				AWSRegion: s3Region,
-				S3: events.S3Entity{
-					Bucket: events.S3Bucket{Name: s3Bucket},
-					Object: events.S3Object{Key: s3Key},
+	s3Events := []events.S3Event{
+
+		{
+			Records: []events.S3EventRecord{
+				{
+					AWSRegion: s3Region,
+					S3: events.S3Entity{
+						Bucket: events.S3Bucket{Name: s3Bucket},
+						Object: events.S3Object{Key: s3Key},
+					},
 				},
 			},
 		},
-	})
-	if err != nil {
-		panic(err)
 	}
 
-	if err := x.run(event); err != nil {
+	if err := x.run(context.Background(), s3Events); err != nil {
 		panic(err)
 	}
 
