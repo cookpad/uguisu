@@ -60,9 +60,15 @@ func New() *Uguisu {
 // Start runs the Lambda handler (logging, request ID on default logger for this invocation, then processing).
 func (x *Uguisu) Start() {
 	lambda.Start(func(ctx context.Context, event *events.SQSEvent) error {
+		defer flushSentry()
+
 		slog.SetDefault(slog.New(log.Handler(ctx)))
 		if err := x.run(ctx, extractEvents(event)); err != nil {
-			slog.Error(err.Error())
+			if id := captureSentryError(ctx, err); id != nil {
+				slog.Error(err.Error(), "sentry_event_id", string(*id))
+			} else {
+				slog.Error(err.Error())
+			}
 			return err
 		}
 		return nil
