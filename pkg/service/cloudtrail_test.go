@@ -114,7 +114,7 @@ func TestCloudTrailLogs_ErrorOnMissingBucket(t *testing.T) {
 	_, err := svc.Read("us-east-1", "my-bucket", "logs/test.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to download cloudtrail log object")
+	assert.Contains(t, err.Error(), "failed to download CloudTrail log object")
 }
 
 func TestCloudTrailLogs_ErrorOnMissingKey(t *testing.T) {
@@ -124,7 +124,7 @@ func TestCloudTrailLogs_ErrorOnMissingKey(t *testing.T) {
 	_, err := svc.Read("us-east-1", "my-bucket", "logs/test.json.gz")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to download cloudtrail log object")
+	assert.Contains(t, err.Error(), "failed to download CloudTrail log object")
 }
 
 func TestCloudTrailLogs_ErrorOnInvalidGzip(t *testing.T) {
