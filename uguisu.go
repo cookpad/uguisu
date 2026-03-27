@@ -74,11 +74,11 @@ func extractEvents(event *events.SQSEvent) []events.S3Event {
 	for _, record := range event.Records {
 		var snsEntity events.SNSEntity
 		if err := json.Unmarshal([]byte(record.Body), &snsEntity); err != nil {
-			slog.Error("failed to unnmarshal sns entity", "error", err)
+			slog.Error("failed to unmarshal sns entity", "error", err)
 		}
 		var s3Event events.S3Event
 		if err := json.Unmarshal([]byte(snsEntity.Message), &s3Event); err != nil {
-			slog.Error("failed to unnmarshal S3 event", "error", err)
+			slog.Error("failed to unmarshal S3 event", "error", err)
 		}
 		output = append(output, s3Event)
 	}
